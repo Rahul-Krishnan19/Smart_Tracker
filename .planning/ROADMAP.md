@@ -61,7 +61,7 @@ Plans:
   5. Sync summary correctly separates parse errors from unmatched emails
   6. HDFC transactions use email received_at date as fallback (not date.today())
 
-**Plans:** 3/3 plans complete
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 03-01-PLAN.md -- Test infrastructure + Alembic migrations + payment_source schema
@@ -198,7 +198,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Auth + Manual Transactions | 3/3 | Complete | 2026-03 |
 | 2. Gmail OAuth + HDFC Parsing | 3/3 | Complete | 2026-04 |
-| 3. Multi-Bank Parsers | 3/3 | Complete   | 2026-04-05 |
+| 3. Multi-Bank Parsers | 3/3 | Complete    | 2026-04-05 |
 | 4. Automated Email Sync | 0/TBD | Not started | - |
 | 5. Data Quality | 0/TBD | Not started | - |
 | 6. Analytics & Trends | 0/TBD | Not started | - |
