@@ -52,11 +52,11 @@
 - [x] **PARSE-02**: HDFC Credit Card alerts parsed (amount, merchant, card ending, date)
 - [ ] **PARSE-03**: ICICI Bank alerts parsed — Phase 3
 - [ ] **PARSE-04**: SBI alerts parsed — Phase 3
-- [ ] **PARSE-05**: Axis Bank alerts parsed — Phase 3
-- [ ] **PARSE-06**: IDFC First Bank alerts parsed — Phase 3
-- [ ] **PARSE-07**: Kotak Mahindra alerts parsed — Phase 3
-- [ ] **PARSE-08**: Flash.co alerts parsed — Phase 3
 - [ ] **PARSE-09**: All parsers extract payment_source (specific card/account identifier) — Phase 3
+- **PARSE-05**: Axis Bank alerts parsed — deferred (out of scope for Phase 3)
+- **PARSE-06**: IDFC First Bank alerts parsed — deferred (out of scope for Phase 3)
+- **PARSE-07**: Kotak Mahindra alerts parsed — deferred (out of scope for Phase 3)
+- **PARSE-08**: Flash.co alerts parsed — deferred (out of scope for Phase 3)
 
 ### Categories & Classification
 
