@@ -3,6 +3,7 @@ FastAPI application entry point.
 Configures middleware, CORS, rate limiting, and mounts routes.
 """
 import os
+from contextlib import asynccontextmanager
 from alembic.config import Config
 from alembic import command
 from fastapi import FastAPI, Request
@@ -14,6 +15,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
 from app.api.routes import auth, transactions, gmail
+from app.scheduler import scheduler, register_startup_jobs
 
 
 def _run_db_migrations():
@@ -25,8 +27,16 @@ def _run_db_migrations():
     command.upgrade(alembic_cfg, "head")
 
 
-# Run migrations on startup (replaces Base.metadata.create_all)
-_run_db_migrations()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # --- startup ---
+    _run_db_migrations()
+    scheduler.start()
+    register_startup_jobs()
+    yield
+    # --- shutdown ---
+    scheduler.shutdown(wait=False)
+
 
 # Rate limiter (shared state)
 limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
@@ -37,6 +47,7 @@ app = FastAPI(
     # Disable interactive docs in production; enable during development
     docs_url="/api/docs" if settings.debug else None,
     redoc_url=None,
+    lifespan=lifespan,
 )
 
 app.state.limiter = limiter
