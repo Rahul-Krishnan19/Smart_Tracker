@@ -1,16 +1,30 @@
 import { useState, useEffect } from 'react'
 import api from '../../services/api'
 
+function formatIST(isoString) {
+  if (!isoString) return null
+  return new Date(isoString).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+}
+
 export default function GmailSync({ onSyncComplete }) {
   const [connected, setConnected] = useState(false)
   const [connecting, setConnecting] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [result, setSyncResult] = useState(null)
   const [error, setError] = useState('')
+  const [lastSyncedAt, setLastSyncedAt] = useState(null)
+  const [syncEnabled, setSyncEnabled] = useState(false)
+  const [syncIntervalHours, setSyncIntervalHours] = useState(24)
+  const [savingSettings, setSavingSettings] = useState(false)
 
   useEffect(() => {
     api.get('/gmail/status')
-      .then(r => setConnected(r.data.connected))
+      .then(r => {
+        setConnected(r.data.connected)
+        setLastSyncedAt(r.data.last_synced_at)
+        setSyncEnabled(r.data.sync_enabled)
+        if (r.data.sync_interval_hours) setSyncIntervalHours(r.data.sync_interval_hours)
+      })
       .catch(() => {})
 
     const params = new URLSearchParams(window.location.search)
@@ -40,6 +54,8 @@ export default function GmailSync({ onSyncComplete }) {
       const res = await api.post('/gmail/sync?max_emails=50')
       setSyncResult(res.data)
       if (res.data.transactions_created > 0) onSyncComplete?.()
+      // Refresh status to get updated last_synced_at
+      api.get('/gmail/status').then(r => setLastSyncedAt(r.data.last_synced_at)).catch(() => {})
     } catch (e) {
       setError(e.response?.data?.detail || 'Sync failed. Please try again.')
     } finally {
@@ -53,8 +69,26 @@ export default function GmailSync({ onSyncComplete }) {
       await api.delete('/gmail/disconnect')
       setConnected(false)
       setSyncResult(null)
+      setSyncEnabled(false)
+      setLastSyncedAt(null)
     } catch (e) {
       setError('Failed to disconnect.')
+    }
+  }
+
+  async function handleSaveSettings(enabled, hours) {
+    setSavingSettings(true)
+    setError('')
+    try {
+      const res = await api.put('/gmail/settings', {
+        sync_enabled: enabled,
+        sync_interval_hours: enabled ? hours : null,
+      })
+      setSyncEnabled(res.data.sync_enabled)
+    } catch (e) {
+      setError(e.response?.data?.detail || 'Failed to save sync settings.')
+    } finally {
+      setSavingSettings(false)
     }
   }
 
@@ -91,6 +125,11 @@ export default function GmailSync({ onSyncComplete }) {
               </svg>
               {syncing ? 'Syncing…' : 'Sync Emails'}
             </button>
+            {lastSyncedAt && (
+              <span className="text-xs text-gray-500">
+                Last updated at {formatIST(lastSyncedAt)}
+              </span>
+            )}
             <span className="text-xs text-green-600 font-medium flex items-center gap-1">
               <span className="w-2 h-2 bg-green-500 rounded-full inline-block"></span>
               Gmail connected
@@ -101,6 +140,42 @@ export default function GmailSync({ onSyncComplete }) {
           </>
         )}
       </div>
+
+      {connected && (
+        <div className="flex items-center gap-3 flex-wrap mt-2 p-3 bg-gray-50 rounded-lg text-sm">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={syncEnabled}
+              onChange={(e) => {
+                const enabled = e.target.checked
+                setSyncEnabled(enabled)
+                handleSaveSettings(enabled, syncIntervalHours)
+              }}
+              disabled={savingSettings}
+              className="rounded border-gray-300"
+            />
+            <span className="text-gray-700 font-medium">Auto-sync</span>
+          </label>
+          {syncEnabled && (
+            <select
+              value={syncIntervalHours}
+              onChange={(e) => {
+                const hours = parseInt(e.target.value, 10)
+                setSyncIntervalHours(hours)
+                handleSaveSettings(true, hours)
+              }}
+              disabled={savingSettings}
+              className="text-sm border border-gray-300 rounded px-2 py-1"
+            >
+              <option value={1}>Every hour</option>
+              <option value={12}>Every 12 hours</option>
+              <option value={24}>Daily</option>
+            </select>
+          )}
+          {savingSettings && <span className="text-xs text-gray-400">Saving...</span>}
+        </div>
+      )}
 
       {error && (
         <div className="p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
