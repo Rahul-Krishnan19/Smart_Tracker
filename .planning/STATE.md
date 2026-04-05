@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 3 of 3
 status: executing
-stopped_at: Completed 03-03-PLAN.md (ICICI + SBI parsers, factory registration)
-last_updated: "2026-04-05T09:10:41.221Z"
+stopped_at: Completed 03-04-PLAN.md (gap closure - populated empty initial Alembic migration)
+last_updated: "2026-04-05T10:30:00.000Z"
 progress:
   total_phases: 10
   completed_phases: 1
@@ -59,6 +59,7 @@ Phase 03 Plans 01 and 02 complete. Ready for Plan 03 (ICICI Credit Card parser +
 ---
 - [Phase 03]: payment_source uses U+2019 right single quotation mark before last4 for ICICI and SBI parsers (consistent with HDFC CC pattern from 03-02)
 - [Phase 03]: SBI merchant=None and category='Others' — debit alerts don't include merchant name; no merchant to categorize on
+- [Phase 03]: payment_source excluded from initial migration — 7a9eaedc9937 must not include payment_source; that column belongs only to 628c6541bc23 to avoid duplicate column error on upgrade
 
 ## Known Blockers / Flags
 
@@ -73,9 +74,8 @@ Phase 03 Plans 01 and 02 complete. Ready for Plan 03 (ICICI Credit Card parser +
 |-------|------|----------|-------|-------|
 | 03 | 01 | 15min | 2 | 13 |
 | 03 | 02 | 15min | 2 | 6 |
-
----
-| Phase 03 P03 | 20min | 2 tasks | 3 files |
+| 03 | 03 | 20min | 2 | 3 |
+| 03 | 04 | 10min | 1 | 2 |
 
 ## Planning Artifacts
 
@@ -88,13 +88,15 @@ Phase 03 Plans 01 and 02 complete. Ready for Plan 03 (ICICI Credit Card parser +
 | `C:\Users\rahul\AppData\Roaming\Claude\plans\PRD-expense-tracker-v2.md` | ✅ Updated |
 | `.planning/phases/03-multi-bank-parsers/03-01-SUMMARY.md` | ✅ Complete |
 | `.planning/phases/03-multi-bank-parsers/03-02-SUMMARY.md` | ✅ Complete |
+| `.planning/phases/03-multi-bank-parsers/03-03-SUMMARY.md` | ✅ Complete |
+| `.planning/phases/03-multi-bank-parsers/03-04-SUMMARY.md` | ✅ Complete |
 
 ---
 
 ## Last Session
 
-**Stopped at:** Completed 03-03-PLAN.md (ICICI + SBI parsers, factory registration)
-**Timestamp:** 2026-04-05T09:01:00Z
+**Stopped at:** Completed 03-04-PLAN.md (gap closure - populated empty initial Alembic migration)
+**Timestamp:** 2026-04-05T10:30:00Z
 
 ---
-*State last updated: 2026-04-05 (Plan 03-02 complete)*
+*State last updated: 2026-04-05 (Plan 03-04 gap closure complete)*
