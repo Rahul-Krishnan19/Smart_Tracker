@@ -52,7 +52,7 @@
 - [x] **PARSE-02**: HDFC Credit Card alerts parsed (amount, merchant, card ending, date)
 - [ ] **PARSE-03**: ICICI Bank alerts parsed — Phase 3
 - [ ] **PARSE-04**: SBI alerts parsed — Phase 3
-- [ ] **PARSE-09**: All parsers extract payment_source (specific card/account identifier) — Phase 3
+- [x] **PARSE-09**: All parsers extract payment_source (specific card/account identifier) — Phase 3
 - **PARSE-05**: Axis Bank alerts parsed — deferred (out of scope for Phase 3)
 - **PARSE-06**: IDFC First Bank alerts parsed — deferred (out of scope for Phase 3)
 - **PARSE-07**: Kotak Mahindra alerts parsed — deferred (out of scope for Phase 3)
@@ -126,7 +126,7 @@
 - [ ] **INFRA-02**: All new schema changes delivered via Alembic migration files — Phase 3+
 - [ ] **INFRA-03**: email_retention_days setting respected (not hardcoded 30 days) — Phase 4
 - [ ] **INFRA-04**: Expired EmailMetadata rows cleaned up by background job — Phase 4
-- [ ] **INFRA-05**: parse_failed / unmatched counters separated in sync summary — Phase 3
+- [x] **INFRA-05**: parse_failed / unmatched counters separated in sync summary — Phase 3
 
 ### Deployment
 
