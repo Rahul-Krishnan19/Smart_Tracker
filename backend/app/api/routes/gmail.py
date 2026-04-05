@@ -8,6 +8,8 @@ Flow:
   GET  /api/gmail/status     → returns connection status
   DELETE /api/gmail/disconnect → removes stored token
 """
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
@@ -82,6 +84,9 @@ def gmail_status(current_user: User = Depends(get_current_user)):
     return {
         "connected": current_user.gmail_token_encrypted is not None,
         "user": current_user.username,
+        "last_synced_at": current_user.last_synced_at.isoformat() if current_user.last_synced_at else None,
+        "sync_enabled": current_user.sync_enabled,
+        "sync_interval_hours": current_user.sync_interval_hours,
     }
 
 
@@ -99,13 +104,24 @@ def sync_emails(
         )
 
     try:
+        # Check for token refresh and persist if needed (GMAIL-05)
+        creds, new_token = gmail_service._get_credentials(current_user.gmail_token_encrypted)
+        if new_token is not None:
+            current_user.gmail_token_encrypted = new_token
+            db.commit()
+
         summary = email_sync_service.sync(
             db=db,
             user_id=current_user.id,
             encrypted_token=current_user.gmail_token_encrypted,
             max_emails=max_emails,
         )
-    except RuntimeError as e:
+
+        # Update last_synced_at after successful sync (D-10)
+        current_user.last_synced_at = datetime.now(timezone.utc)
+        db.commit()
+
+    except (RuntimeError, Exception) as e:
         raise HTTPException(status_code=502, detail=str(e))
 
     return {

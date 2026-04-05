@@ -8,6 +8,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.models.email_metadata import EmailMetadata
 from app.models.transaction import Transaction
 from app.services.gmail_service import gmail_service
@@ -39,7 +40,7 @@ class EmailSyncService:
         emails = gmail_service.fetch_transaction_emails(encrypted_token, max_results=max_emails)
         summary["fetched"] = len(emails)
 
-        retention_cutoff = datetime.now(timezone.utc) + timedelta(days=30)
+        retention_cutoff = datetime.now(timezone.utc) + timedelta(days=settings.email_retention_days)
 
         for email in emails:
             gmail_id = email["id"]

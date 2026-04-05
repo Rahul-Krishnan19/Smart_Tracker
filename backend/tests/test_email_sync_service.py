@@ -90,10 +90,57 @@ def test_parse_failed_counter(in_memory_db):
     )
 
 
-@pytest.mark.skip(reason="Awaiting INFRA-03 fix in Plan 01 Task 2")
 def test_retention_days_from_settings(in_memory_db):
     """
     INFRA-03: email_sync_service uses settings.email_retention_days, not hardcoded 30.
     Patch settings.email_retention_days to 60 and assert delete_after is ~60 days from now.
     """
-    pass
+    from app.models.email_metadata import EmailMetadata
+
+    service = EmailSyncService()
+
+    def _make_test_email():
+        return {
+            "id": "msg_retention_test",
+            "sender": "alerts@hdfcbank.net",
+            "subject": "Transaction Alert",
+            "body": "Some body",
+            "received_at": datetime(2026, 4, 1, 12, 0, 0),
+        }
+
+    with patch(
+        "app.services.email_sync_service.gmail_service.fetch_transaction_emails",
+        return_value=[_make_test_email()],
+    ), patch(
+        "app.services.email_sync_service.parse_email",
+        return_value=None,
+    ), patch(
+        "app.services.email_sync_service.settings.email_retention_days",
+        new=60,
+    ):
+        service.sync(
+            db=in_memory_db,
+            user_id=1,
+            encrypted_token="fake_token",
+            max_emails=1,
+        )
+
+    meta = in_memory_db.query(EmailMetadata).filter(
+        EmailMetadata.gmail_message_id == "msg_retention_test"
+    ).first()
+    assert meta is not None, "EmailMetadata row not created"
+
+    now = datetime.now(timezone.utc)
+    expected_min = now + timedelta(days=59, hours=23)
+    expected_max = now + timedelta(days=60, hours=1)
+
+    # delete_after may be timezone-naive (SQLite) — normalize for comparison
+    delete_after = meta.delete_after
+    if delete_after.tzinfo is None:
+        from datetime import timezone as tz
+        delete_after = delete_after.replace(tzinfo=tz.utc)
+
+    assert expected_min <= delete_after <= expected_max, (
+        f"Expected delete_after ~60 days from now, got {delete_after}. "
+        "If this is ~30 days, the hardcoded timedelta(days=30) was not replaced."
+    )
