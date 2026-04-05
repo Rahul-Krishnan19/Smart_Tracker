@@ -45,5 +45,7 @@ class BaseEmailParser(ABC):
         """Return True if this parser can handle the given email."""
 
     @abstractmethod
-    def parse(self, body: str, subject: str) -> Optional[ParsedTransaction]:
-        """Parse the email body and return a ParsedTransaction, or None if parsing fails."""
+    def parse(self, email: dict) -> Optional[ParsedTransaction]:
+        """Parse the email dict and return a ParsedTransaction, or None if parsing fails.
+        email keys: id, sender, subject, body, received_at (datetime or None)
+        """
