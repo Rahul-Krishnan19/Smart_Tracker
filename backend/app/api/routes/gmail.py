@@ -6,9 +6,11 @@ Flow:
   GET  /api/gmail/callback   → handles redirect from Google, stores encrypted token
   POST /api/gmail/sync       → fetches + parses transaction emails
   GET  /api/gmail/status     → returns connection status
+  PUT  /api/gmail/settings   → update auto-sync settings
   DELETE /api/gmail/disconnect → removes stored token
 """
 from datetime import datetime, timezone
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
@@ -20,12 +22,18 @@ from app.api.routes.auth import get_current_user
 from app.models.user import User
 from app.services.gmail_service import gmail_service
 from app.services.email_sync_service import email_sync_service
+from app.scheduler import register_sync_job, unregister_sync_job
 
 router = APIRouter()
 
 
 class CodeExchange(BaseModel):
     code: str
+
+
+class SyncSettingsUpdate(BaseModel):
+    sync_enabled: bool
+    sync_interval_hours: Optional[int] = None
 
 
 @router.post("/exchange")
@@ -132,6 +140,34 @@ def sync_emails(
         "parse_failed": summary["parse_failed"],
         "unmatched": summary["unmatched"],
         "transactions_created": summary["transactions_created"],
+    }
+
+
+@router.put("/settings")
+def update_sync_settings(
+    body: SyncSettingsUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """GMAIL-10: Update auto-sync settings. Per D-05, D-07."""
+    if body.sync_enabled and (not body.sync_interval_hours or body.sync_interval_hours < 1):
+        raise HTTPException(
+            status_code=422,
+            detail="sync_interval_hours must be >= 1 when sync is enabled",
+        )
+    current_user.sync_enabled = body.sync_enabled
+    current_user.sync_interval_hours = body.sync_interval_hours if body.sync_enabled else None
+    db.commit()
+
+    if body.sync_enabled:
+        register_sync_job(current_user.id, body.sync_interval_hours)
+    else:
+        unregister_sync_job(current_user.id)
+
+    return {
+        "status": "ok",
+        "sync_enabled": current_user.sync_enabled,
+        "sync_interval_hours": current_user.sync_interval_hours,
     }
 
 
