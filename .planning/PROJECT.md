@@ -18,10 +18,15 @@ Automatically pull every bank transaction from Gmail and show exactly where your
 - ✓ HDFC Bank email parsing — UPI debit + Credit Card alerts — Phase 2
 - ✓ Email deduplication by Gmail message ID — Phase 2
 - ✓ Category breakdown + payment method breakdown charts — Phase 2
+- ✓ ICICI Bank Credit Card email parsing — Phase 3
+- ✓ SBI Bank debit email parsing (NACH/transfer; FD/TDS skipped) — Phase 3
+- ✓ payment_source field on all parsers (e.g. "ICICI CC ••6005", "SBI ••4599") — Phase 3
+- ✓ Alembic migrations — startup uses `alembic upgrade head`; initial + payment_source migrations — Phase 3
+- ✓ Sync summary separates parse_failed vs unmatched emails — Phase 3
 
 ### Active
 
-- [ ] Multi-bank parser support (ICICI, SBI, Axis, IDFC, Kotak, Flash.co) — Phase 3
+- [ ] Multi-bank parser support (Axis, IDFC, Kotak, Flash.co — deferred) — post-Phase 3
 - [ ] Automated email sync via cron job (APScheduler) — Phase 4
 - [ ] Sub-categories + DB-backed keyword classification rules — Phase 5
 - [ ] Granular payment source filtering (per card/account) — Phase 5
@@ -51,8 +56,8 @@ Automatically pull every bank transaction from Gmail and show exactly where your
 
 ## Context
 
-- **Codebase state:** Phases 1–2 complete. Python 3.14 on Windows dev machine; Linux VPS is the deployment target.
-- **Critical bug — Alembic:** Installed but no migration files exist. `Base.metadata.create_all()` is used at startup. Must generate initial migration before any new column is added in Phase 3+.
+- **Codebase state:** Phases 1–3 complete. Python 3.14 on Windows dev machine; Linux VPS is the deployment target.
+- **Alembic:** Fully bootstrapped — 2 migration files, startup uses `alembic upgrade head`. Resolved in Phase 3.
 - **Critical bug — Gmail token refresh:** Refreshed access tokens are not persisted back to DB. Fix in Phase 4.
 - **Python 3.14 constraints:** `pydantic>=2.12.5` required (cp314 wheel). `pandas` blocked on Windows dev — use VPS for CSV/Excel. APScheduler wheel must be verified before Phase 4.
 - **Parser architecture:** `BaseEmailParser` ABC at `backend/app/parsers/base_parser.py`. Adding a bank = one new file + one line in `PARSERS` list.
@@ -99,4 +104,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after initial GSD project initialization*
+*Last updated: 2026-04-05 after Phase 3 completion*
