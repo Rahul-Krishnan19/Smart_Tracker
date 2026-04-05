@@ -8,7 +8,7 @@ Transform the expense tracker from a manual Gmail-sync viewer into an active fin
 
 - [x] **Phase 1: Auth + Manual Transactions** - JWT + TOTP 2FA auth and manual transaction CRUD
 - [x] **Phase 2: Gmail OAuth + HDFC Parsing** - Gmail OAuth2 integration and HDFC email parser
-- [x] **Phase 3: Multi-Bank Parsers** - ICICI and SBI bank email parsers + Alembic migration setup (completed 2026-04-05)
+- [x] **Phase 3: Multi-Bank Parsers** - ICICI and SBI bank email parsers + Alembic migration setup (completed 2026-04-05)
 - [ ] **Phase 4: Automated Email Sync** - APScheduler cron sync with settings and sync history
 - [ ] **Phase 5: Data Quality** - Sub-categories, payment source, enhanced filtering, CSV upload
 - [ ] **Phase 6: Analytics & Trends** - Trend charts, budgets, and spending goal tracking
@@ -69,22 +69,23 @@ Plans:
 - [x] 03-03-PLAN.md -- ICICI and SBI parsers + factory registration
 
 ### Phase 4: Automated Email Sync
-**Goal**: Replace manual sync button with a scheduled background cron job, with user-configurable schedule and sync history
+**Goal**: Add APScheduler background sync with per-user configurable schedule, fix Gmail token refresh persistence, and clean up expired email metadata
 **Depends on**: Phase 3
-**Requirements**: GMAIL-05, GMAIL-06, GMAIL-07, GMAIL-08, GMAIL-09, GMAIL-10, INFRA-03, INFRA-04
+**Requirements**: GMAIL-05, GMAIL-06, GMAIL-07, GMAIL-08, GMAIL-10, INFRA-03, INFRA-04
+**Note**: GMAIL-09 (sync history log) explicitly deferred
 **Success Criteria** (what must be TRUE):
-  1. Emails sync automatically on a schedule (default: daily 02:00) without user action
-  2. Header shows "Last synced: Xh ago · Sync Now" with working manual trigger
-  3. Sync failures surface as an in-app alert (not silent)
+  1. Emails sync automatically on a schedule (default: daily) without user action
+  2. "Last updated at" timestamp shows in IST next to Sync Emails button
+  3. Sync failures surface as in-app alert (not silent)
   4. User can change sync frequency in Settings
   5. Refreshed Gmail OAuth tokens are persisted back to DB
 
 **Plans:** 3 plans
 
 Plans:
-- [x] 03-01-PLAN.md -- Test infrastructure + Alembic migrations + payment_source schema
-- [x] 03-02-PLAN.md -- Parser interface change + HDFC fixes + sync service refactor
-- [ ] 03-03-PLAN.md -- ICICI and SBI parsers + factory registration
+- [ ] 04-01-PLAN.md -- APScheduler install + schema migration + token refresh fix + INFRA-03
+- [ ] 04-02-PLAN.md -- Scheduler module + lifespan + settings route + cleanup job
+- [ ] 04-03-PLAN.md -- Frontend last-synced display + sync settings UI + verification
 
 ### Phase 5: Data Quality
 **Goal**: Reduce "Others" category share, add per-card payment filtering, and make the transaction table a first-class feature with filtering, export, and CSV upload
@@ -101,9 +102,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Test infrastructure + Alembic migrations + payment_source schema
-- [ ] 03-02-PLAN.md -- Parser interface change + HDFC fixes + sync service refactor
-- [ ] 03-03-PLAN.md -- ICICI and SBI parsers + factory registration
+- [ ] 05-01-PLAN.md -- TBD
+- [ ] 05-02-PLAN.md -- TBD
+- [ ] 05-03-PLAN.md -- TBD
 
 ### Phase 6: Analytics & Trends
 **Goal**: Turn transaction data into a time story with trend charts, category budgets, and monthly spending goals
@@ -118,9 +119,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Test infrastructure + Alembic migrations + payment_source schema
-- [ ] 03-02-PLAN.md -- Parser interface change + HDFC fixes + sync service refactor
-- [ ] 03-03-PLAN.md -- ICICI and SBI parsers + factory registration
+- [ ] 06-01-PLAN.md -- TBD
+- [ ] 06-02-PLAN.md -- TBD
+- [ ] 06-03-PLAN.md -- TBD
 
 ### Phase 7: Pattern Detection & Insights
 **Goal**: Surface anomalies, recurring charges, and spending patterns automatically using rule-based detection
@@ -135,9 +136,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Test infrastructure + Alembic migrations + payment_source schema
-- [ ] 03-02-PLAN.md -- Parser interface change + HDFC fixes + sync service refactor
-- [ ] 03-03-PLAN.md -- ICICI and SBI parsers + factory registration
+- [ ] 07-01-PLAN.md -- TBD
+- [ ] 07-02-PLAN.md -- TBD
+- [ ] 07-03-PLAN.md -- TBD
 
 ### Phase 8: Polish & Publishing Readiness
 **Goal**: Fully responsive mobile layout, dark mode, and a guided onboarding wizard for new users
@@ -152,9 +153,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Test infrastructure + Alembic migrations + payment_source schema
-- [ ] 03-02-PLAN.md -- Parser interface change + HDFC fixes + sync service refactor
-- [ ] 03-03-PLAN.md -- ICICI and SBI parsers + factory registration
+- [ ] 08-01-PLAN.md -- TBD
+- [ ] 08-02-PLAN.md -- TBD
+- [ ] 08-03-PLAN.md -- TBD
 
 ### Phase 9: Security Hardening
 **Goal**: Close known security gaps — JWT storage, token invalidation, TOTP rate limiting, and dependency hygiene
@@ -169,9 +170,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Test infrastructure + Alembic migrations + payment_source schema
-- [ ] 03-02-PLAN.md -- Parser interface change + HDFC fixes + sync service refactor
-- [ ] 03-03-PLAN.md -- ICICI and SBI parsers + factory registration
+- [ ] 09-01-PLAN.md -- TBD
+- [ ] 09-02-PLAN.md -- TBD
+- [ ] 09-03-PLAN.md -- TBD
 
 ### Phase 10: VPS Deployment
 **Goal**: Production-ready self-hosted deployment on Linux VPS with nginx, TLS, systemd, and Alembic migrations
@@ -186,9 +187,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Test infrastructure + Alembic migrations + payment_source schema
-- [ ] 03-02-PLAN.md -- Parser interface change + HDFC fixes + sync service refactor
-- [ ] 03-03-PLAN.md -- ICICI and SBI parsers + factory registration
+- [ ] 10-01-PLAN.md -- TBD
+- [ ] 10-02-PLAN.md -- TBD
+- [ ] 10-03-PLAN.md -- TBD
 
 ## Progress
 
@@ -199,7 +200,7 @@ Plans:
 | 1. Auth + Manual Transactions | 3/3 | Complete | 2026-03 |
 | 2. Gmail OAuth + HDFC Parsing | 3/3 | Complete | 2026-04 |
 | 3. Multi-Bank Parsers | 3/3 | Complete    | 2026-04-05 |
-| 4. Automated Email Sync | 0/TBD | Not started | - |
+| 4. Automated Email Sync | 0/3 | Planned | - |
 | 5. Data Quality | 0/TBD | Not started | - |
 | 6. Analytics & Trends | 0/TBD | Not started | - |
 | 7. Pattern Detection & Insights | 0/TBD | Not started | - |
