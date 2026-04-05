@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: "04-01 complete"
+current_plan: "04-02 complete"
 status: in_progress
-stopped_at: Completed 04-01-PLAN.md (APScheduler + sync columns + token refresh fix)
-last_updated: "2026-04-05T15:19:00Z"
+stopped_at: Completed 04-02-PLAN.md (APScheduler lifespan + scheduler jobs + PUT /api/gmail/settings)
+last_updated: "2026-04-05T16:30:00Z"
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 5
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-05)
 **Current Plan:** 04-01 complete — ready for 04-02 (APScheduler jobs + settings route)
 **Status:** In progress
 
-Phase 04 Plan 01 complete: APScheduler installed, User sync columns added, token refresh bug fixed, test stubs created.
+Phase 04 Plan 02 complete: APScheduler lifespan integration, per-user sync jobs, daily cleanup job, PUT /api/gmail/settings route. 42 tests all green.
 
 ---
 
@@ -44,7 +44,7 @@ Phase 04 Plan 01 complete: APScheduler installed, User sync columns added, token
 
 ## Active Work
 
-Phase 04 Plan 01 complete. Ready for Plan 02 (APScheduler lifespan integration + scheduler job + settings route).
+Phase 04 Plans 01 and 02 complete. Core automated sync is working end-to-end.
 
 ---
 
@@ -63,6 +63,10 @@ Phase 04 Plan 01 complete. Ready for Plan 02 (APScheduler lifespan integration +
 - [Phase 04-01]: _get_credentials returns tuple[Credentials, str | None] — callers must unpack and persist new_token if non-None to avoid losing refreshed tokens
 - [Phase 04-01]: APScheduler 3.11.2 installs cleanly on Python 3.14 (pure wheel, no C compilation)
 - [Phase 04-01]: email_retention_days moved from hardcoded 30 to settings.email_retention_days (default 30)
+- [Phase 04-02]: SQLAlchemy 2.0 sessionmaker supports context manager — with SessionLocal() as db used in scheduler
+- [Phase 04-02]: module-level _run_db_migrations() moved into lifespan startup to avoid running on every import
+- [Phase 04-02]: scheduler.shutdown(wait=False) avoids blocking app termination
+- [Phase 04-02]: register_startup_jobs() re-registers all enabled user jobs from DB on restart (in-memory job store)
 
 ## Known Blockers / Flags
 
@@ -79,6 +83,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 | 03 | 03 | 20min | 2 | 3 |
 | 03 | 04 | 10min | 1 | 2 |
 | 04 | 01 | 5min | 2 | 10 |
+| 04 | 02 | 6min | 2 | 5 |
 
 ## Planning Artifacts
 
@@ -94,13 +99,14 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 | `.planning/phases/03-multi-bank-parsers/03-03-SUMMARY.md` | ✅ Complete |
 | `.planning/phases/03-multi-bank-parsers/03-04-SUMMARY.md` | ✅ Complete |
 | `.planning/phases/04-automated-email-sync/04-01-SUMMARY.md` | ✅ Complete |
+| `.planning/phases/04-automated-email-sync/04-02-SUMMARY.md` | ✅ Complete |
 
 ---
 
 ## Last Session
 
-**Stopped at:** Completed 04-01-PLAN.md (APScheduler + sync columns + token refresh fix)
-**Timestamp:** 2026-04-05T15:19:00Z
+**Stopped at:** Completed 04-02-PLAN.md (APScheduler lifespan + scheduler jobs + PUT /api/gmail/settings)
+**Timestamp:** 2026-04-05T16:30:00Z
 
 ---
-*State last updated: 2026-04-05 (Plan 03-04 gap closure complete)*
+*State last updated: 2026-04-05 (Plan 04-02 complete — background sync fully operational)*

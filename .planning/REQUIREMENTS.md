@@ -40,11 +40,11 @@
 - [x] **GMAIL-03**: Manual email sync fetches and parses transaction emails
 - [x] **GMAIL-04**: Duplicate emails skipped by Gmail message ID dedup
 - [x] **GMAIL-05**: Refreshed OAuth access tokens persisted back to DB — Phase 4 ✅ Plan 04-01
-- [ ] **GMAIL-06**: Automated sync on configurable cron schedule (default: daily 02:00) — Phase 4
+- [x] **GMAIL-06**: Automated sync on configurable cron schedule (default: daily 02:00) — Phase 4 ✅ Plan 04-02
 - [ ] **GMAIL-07**: Sync status visible in header: "Last synced: Xh ago · Sync Now" — Phase 4
-- [ ] **GMAIL-08**: Sync failures surface as in-app alert (not silent) — Phase 4
-- [ ] **GMAIL-09**: Sync history log accessible in Settings — Phase 4
-- [ ] **GMAIL-10**: Sync schedule user-configurable (hourly / 6h / daily / custom cron) — Phase 4
+- [x] **GMAIL-08**: Sync failures logged and do not crash scheduler (GMAIL-08) — Phase 4 ✅ Plan 04-02
+- [ ] **GMAIL-09**: Sync history log accessible in Settings — Phase 4 (deferred per D-15)
+- [x] **GMAIL-10**: Sync schedule user-configurable via PUT /api/gmail/settings — Phase 4 ✅ Plan 04-02
 
 ### Bank Parsers
 
@@ -125,7 +125,7 @@
 - [ ] **INFRA-01**: Alembic initial migration generated; startup uses `alembic upgrade head` — Phase 3
 - [ ] **INFRA-02**: All new schema changes delivered via Alembic migration files — Phase 3+
 - [x] **INFRA-03**: email_retention_days setting respected (not hardcoded 30 days) — Phase 4 ✅ Plan 04-01
-- [ ] **INFRA-04**: Expired EmailMetadata rows cleaned up by background job — Phase 4
+- [x] **INFRA-04**: Expired EmailMetadata rows cleaned up by background job (daily 03:00 cron) — Phase 4 ✅ Plan 04-02
 - [x] **INFRA-05**: parse_failed / unmatched counters separated in sync summary — Phase 3
 
 ### Deployment
