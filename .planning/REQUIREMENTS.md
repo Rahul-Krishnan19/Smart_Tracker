@@ -39,7 +39,7 @@
 - [x] **GMAIL-02**: OAuth token encrypted at rest with Fernet
 - [x] **GMAIL-03**: Manual email sync fetches and parses transaction emails
 - [x] **GMAIL-04**: Duplicate emails skipped by Gmail message ID dedup
-- [ ] **GMAIL-05**: Refreshed OAuth access tokens persisted back to DB — Phase 4
+- [x] **GMAIL-05**: Refreshed OAuth access tokens persisted back to DB — Phase 4 ✅ Plan 04-01
 - [ ] **GMAIL-06**: Automated sync on configurable cron schedule (default: daily 02:00) — Phase 4
 - [ ] **GMAIL-07**: Sync status visible in header: "Last synced: Xh ago · Sync Now" — Phase 4
 - [ ] **GMAIL-08**: Sync failures surface as in-app alert (not silent) — Phase 4
@@ -124,7 +124,7 @@
 
 - [ ] **INFRA-01**: Alembic initial migration generated; startup uses `alembic upgrade head` — Phase 3
 - [ ] **INFRA-02**: All new schema changes delivered via Alembic migration files — Phase 3+
-- [ ] **INFRA-03**: email_retention_days setting respected (not hardcoded 30 days) — Phase 4
+- [x] **INFRA-03**: email_retention_days setting respected (not hardcoded 30 days) — Phase 4 ✅ Plan 04-01
 - [ ] **INFRA-04**: Expired EmailMetadata rows cleaned up by background job — Phase 4
 - [x] **INFRA-05**: parse_failed / unmatched counters separated in sync summary — Phase 3
 
