@@ -5,12 +5,13 @@ To add a new bank: instantiate its parser here and add to PARSERS list.
 from typing import Optional
 from app.parsers.base_parser import BaseEmailParser, ParsedTransaction
 from app.parsers.hdfc_parser import HDFCParser
+from app.parsers.icici_parser import ICICIParser
+from app.parsers.sbi_parser import SBIParser
 
 PARSERS: list[BaseEmailParser] = [
     HDFCParser(),
-    # ICICIParser(),   # Phase 3
-    # SBIParser(),     # Phase 3
-    # FlashParser(),   # Phase 3
+    ICICIParser(),
+    SBIParser(),
 ]
 
 
