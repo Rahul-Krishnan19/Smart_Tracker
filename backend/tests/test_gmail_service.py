@@ -32,7 +32,6 @@ def _make_token_json(expired: bool = False, has_refresh: bool = True) -> str:
 # Tests
 # ---------------------------------------------------------------------------
 
-@pytest.mark.skip(reason="RED: awaiting _get_credentials tuple fix in Plan 01 Task 2")
 def test_get_credentials_returns_tuple():
     """
     _get_credentials() with a non-expired token returns a 2-tuple (creds, None).
@@ -60,7 +59,6 @@ def test_get_credentials_returns_tuple():
     assert new_token is None, f"Expected None for non-expired token, got {new_token!r}"
 
 
-@pytest.mark.skip(reason="RED: awaiting _get_credentials tuple fix in Plan 01 Task 2")
 def test_get_credentials_refreshes_expired_token():
     """
     _get_credentials() with an expired token refreshes and returns (creds, new_encrypted_string).
@@ -100,7 +98,6 @@ def test_get_credentials_refreshes_expired_token():
     assert new_token == "new_encrypted_token"
 
 
-@pytest.mark.skip(reason="RED: awaiting _get_credentials tuple fix in Plan 01 Task 2")
 def test_get_credentials_refresh_failure_raises():
     """
     _get_credentials() raises RuntimeError when token refresh fails.
