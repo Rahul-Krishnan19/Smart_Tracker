@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: "04-02 complete"
+current_plan: "04-03 task-1 complete, task-2 pending human verify"
 status: in_progress
-stopped_at: Completed 04-02-PLAN.md (APScheduler lifespan + scheduler jobs + PUT /api/gmail/settings)
-last_updated: "2026-04-05T16:30:00Z"
+stopped_at: "04-03 Task 1 complete — GmailSync.jsx updated with timestamp + auto-sync UI. Task 2 awaiting human verification."
+last_updated: "2026-04-05T16:43:00Z"
 progress:
   total_phases: 10
   completed_phases: 1
@@ -32,6 +32,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-05)
 **Status:** In progress
 
 Phase 04 Plan 02 complete: APScheduler lifespan integration, per-user sync jobs, daily cleanup job, PUT /api/gmail/settings route. 42 tests all green.
+
+Phase 04 Plan 03 Task 1 complete: GmailSync.jsx updated with IST "Last updated at" timestamp and auto-sync settings UI. Task 2 (human verification) pending.
 
 ---
 
@@ -67,6 +69,8 @@ Phase 04 Plans 01 and 02 complete. Core automated sync is working end-to-end.
 - [Phase 04-02]: module-level _run_db_migrations() moved into lifespan startup to avoid running on every import
 - [Phase 04-02]: scheduler.shutdown(wait=False) avoids blocking app termination
 - [Phase 04-02]: register_startup_jobs() re-registers all enabled user jobs from DB on restart (in-memory job store)
+- [Phase 04-03]: formatIST at module level (not inside component) — avoids re-creation on render
+- [Phase 04-03]: Settings section guarded by connected state, timestamp guarded by lastSyncedAt non-null (D-11)
 
 ## Known Blockers / Flags
 
@@ -84,6 +88,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 | 03 | 04 | 10min | 1 | 2 |
 | 04 | 01 | 5min | 2 | 10 |
 | 04 | 02 | 6min | 2 | 5 |
+| 04 | 03 | 8min | 1 | 1 |
 
 ## Planning Artifacts
 
@@ -100,13 +105,14 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 | `.planning/phases/03-multi-bank-parsers/03-04-SUMMARY.md` | ✅ Complete |
 | `.planning/phases/04-automated-email-sync/04-01-SUMMARY.md` | ✅ Complete |
 | `.planning/phases/04-automated-email-sync/04-02-SUMMARY.md` | ✅ Complete |
+| `.planning/phases/04-automated-email-sync/04-03-SUMMARY.md` | Task 1 complete — Task 2 pending human verify |
 
 ---
 
 ## Last Session
 
-**Stopped at:** Completed 04-02-PLAN.md (APScheduler lifespan + scheduler jobs + PUT /api/gmail/settings)
-**Timestamp:** 2026-04-05T16:30:00Z
+**Stopped at:** 04-03 Task 1 complete — GmailSync.jsx updated (timestamp + auto-sync UI). Task 2 awaiting human verification.
+**Timestamp:** 2026-04-05T16:43:00Z
 
 ---
 *State last updated: 2026-04-05 (Plan 04-02 complete — background sync fully operational)*
