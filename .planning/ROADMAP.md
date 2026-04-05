@@ -8,7 +8,7 @@ Transform the expense tracker from a manual Gmail-sync viewer into an active fin
 
 - [x] **Phase 1: Auth + Manual Transactions** - JWT + TOTP 2FA auth and manual transaction CRUD
 - [x] **Phase 2: Gmail OAuth + HDFC Parsing** - Gmail OAuth2 integration and HDFC email parser
-- [ ] **Phase 3: Multi-Bank Parsers** - ICICI and SBI bank email parsers + Alembic migration setup
+- [x] **Phase 3: Multi-Bank Parsers** - ICICI and SBI bank email parsers + Alembic migration setup (completed 2026-04-05)
 - [ ] **Phase 4: Automated Email Sync** - APScheduler cron sync with settings and sync history
 - [ ] **Phase 5: Data Quality** - Sub-categories, payment source, enhanced filtering, CSV upload
 - [ ] **Phase 6: Analytics & Trends** - Trend charts, budgets, and spending goal tracking
@@ -61,12 +61,12 @@ Plans:
   5. Sync summary correctly separates parse errors from unmatched emails
   6. HDFC transactions use email received_at date as fallback (not date.today())
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 03-01-PLAN.md -- Test infrastructure + Alembic migrations + payment_source schema
 - [x] 03-02-PLAN.md -- Parser interface change + HDFC fixes + sync service refactor
-- [ ] 03-03-PLAN.md -- ICICI and SBI parsers + factory registration
+- [x] 03-03-PLAN.md -- ICICI and SBI parsers + factory registration
 
 ### Phase 4: Automated Email Sync
 **Goal**: Replace manual sync button with a scheduled background cron job, with user-configurable schedule and sync history
@@ -82,8 +82,8 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Test infrastructure + Alembic migrations + payment_source schema
-- [ ] 03-02-PLAN.md -- Parser interface change + HDFC fixes + sync service refactor
+- [x] 03-01-PLAN.md -- Test infrastructure + Alembic migrations + payment_source schema
+- [x] 03-02-PLAN.md -- Parser interface change + HDFC fixes + sync service refactor
 - [ ] 03-03-PLAN.md -- ICICI and SBI parsers + factory registration
 
 ### Phase 5: Data Quality
@@ -198,7 +198,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Auth + Manual Transactions | 3/3 | Complete | 2026-03 |
 | 2. Gmail OAuth + HDFC Parsing | 3/3 | Complete | 2026-04 |
-| 3. Multi-Bank Parsers | 2/3 | In Progress|  |
+| 3. Multi-Bank Parsers | 3/3 | Complete   | 2026-04-05 |
 | 4. Automated Email Sync | 0/TBD | Not started | - |
 | 5. Data Quality | 0/TBD | Not started | - |
 | 6. Analytics & Trends | 0/TBD | Not started | - |

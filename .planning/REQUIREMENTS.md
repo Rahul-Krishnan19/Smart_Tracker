@@ -50,8 +50,8 @@
 
 - [x] **PARSE-01**: HDFC UPI debit alerts parsed (amount, merchant, VPA, date)
 - [x] **PARSE-02**: HDFC Credit Card alerts parsed (amount, merchant, card ending, date)
-- [ ] **PARSE-03**: ICICI Bank alerts parsed — Phase 3
-- [ ] **PARSE-04**: SBI alerts parsed — Phase 3
+- [x] **PARSE-03**: ICICI Bank alerts parsed — Phase 3
+- [x] **PARSE-04**: SBI alerts parsed — Phase 3
 - [x] **PARSE-09**: All parsers extract payment_source (specific card/account identifier) — Phase 3
 - **PARSE-05**: Axis Bank alerts parsed — deferred (out of scope for Phase 3)
 - **PARSE-06**: IDFC First Bank alerts parsed — deferred (out of scope for Phase 3)

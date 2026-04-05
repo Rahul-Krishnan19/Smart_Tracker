@@ -2,13 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
+current_plan: 3 of 3
 status: executing
-last_updated: "2026-04-05T09:01:00.000Z"
+stopped_at: Completed 03-03-PLAN.md (ICICI + SBI parsers, factory registration)
+last_updated: "2026-04-05T09:10:41.221Z"
 progress:
   total_phases: 10
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -55,6 +57,8 @@ Phase 03 Plans 01 and 02 complete. Ready for Plan 03 (ICICI Credit Card parser +
 - **payment_source uses U+2019 right single quotation mark before last4** — matches test expectation in test_hdfc_parser.py (Phase 3, Plan 2)
 
 ---
+- [Phase 03]: payment_source uses U+2019 right single quotation mark before last4 for ICICI and SBI parsers (consistent with HDFC CC pattern from 03-02)
+- [Phase 03]: SBI merchant=None and category='Others' — debit alerts don't include merchant name; no merchant to categorize on
 
 ## Known Blockers / Flags
 
@@ -71,6 +75,7 @@ Phase 03 Plans 01 and 02 complete. Ready for Plan 03 (ICICI Credit Card parser +
 | 03 | 02 | 15min | 2 | 6 |
 
 ---
+| Phase 03 P03 | 20min | 2 tasks | 3 files |
 
 ## Planning Artifacts
 
@@ -88,7 +93,7 @@ Phase 03 Plans 01 and 02 complete. Ready for Plan 03 (ICICI Credit Card parser +
 
 ## Last Session
 
-**Stopped at:** Completed 03-02-PLAN.md (HDFC parser interface refactor + sync service unmatched counter)
+**Stopped at:** Completed 03-03-PLAN.md (ICICI + SBI parsers, factory registration)
 **Timestamp:** 2026-04-05T09:01:00Z
 
 ---
