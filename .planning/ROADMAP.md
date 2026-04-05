@@ -201,7 +201,7 @@ Plans:
 | 2. Gmail OAuth + HDFC Parsing | 3/3 | Complete | 2026-04 |
 | 3. Multi-Bank Parsers | 3/3 | Complete    | 2026-04-05 |
 | 4. Automated Email Sync | 0/3 | Planned | - |
-| 5. Data Quality | 0/TBD | Not started | - |
+| 5. Data Quality | 0/3 | Planned | - |
 | 6. Analytics & Trends | 0/TBD | Not started | - |
 | 7. Pattern Detection & Insights | 0/TBD | Not started | - |
 | 8. Polish & Publishing | 0/TBD | Not started | - |
