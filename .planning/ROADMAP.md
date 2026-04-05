@@ -44,16 +44,18 @@ Delivered:
 Scope:
 - ICICI Bank parser (credit card + iMobile alerts)
 - SBI parser (credit card + YONO alerts)
-- Axis Bank parser (Edge card + UPI)
-- IDFC First Bank parser (credit card + FASTag)
-- Kotak Mahindra parser (credit card alerts)
-- Flash.co parser (spend alerts)
 - All parsers extract `payment_source` (card/account identifier)
 - Fix: HDFC date fallback → use `email["received_at"]` not `date.today()`
 - Fix: separate `parse_failed` vs `unmatched` counters in sync summary
 - **Prerequisite:** Generate initial Alembic migration before this phase
 
-Requirements: PARSE-03–09, INFRA-01–02, INFRA-05
+Out of scope (deferred to later):
+- Axis Bank parser
+- IDFC First Bank parser
+- Kotak Mahindra parser
+- Flash.co parser
+
+Requirements: PARSE-03–04, PARSE-09, INFRA-01–02, INFRA-05
 
 Canonical refs:
 - `backend/app/parsers/base_parser.py` — BaseEmailParser interface
