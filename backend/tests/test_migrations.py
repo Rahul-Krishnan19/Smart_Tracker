@@ -91,8 +91,8 @@ def test_payment_source_column_nullable():
         try:
             # Insert a minimal user first (FK constraint)
             conn.execute(
-                "INSERT INTO users (id, email, hashed_password, is_active, is_verified) "
-                "VALUES (1, 'test@example.com', 'hash', 1, 1)"
+                "INSERT INTO users (id, username, email, password_hash, totp_enrolled, is_active) "
+                "VALUES (1, 'testuser', 'test@example.com', 'hash', 0, 1)"
             )
             # Insert transaction with payment_source explicitly NULL
             conn.execute(
