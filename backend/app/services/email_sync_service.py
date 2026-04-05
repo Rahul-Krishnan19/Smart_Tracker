@@ -1,0 +1,115 @@
+"""
+Email sync service — orchestrates fetching emails from Gmail,
+running them through parsers, and saving new transactions to DB.
+Skips emails already processed (dedup by Gmail message ID).
+"""
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+
+from sqlalchemy.orm import Session
+
+from app.models.email_metadata import EmailMetadata
+from app.models.transaction import Transaction
+from app.services.gmail_service import gmail_service
+from app.parsers.parser_factory import get_parser, parse_email
+
+
+class EmailSyncService:
+
+    def sync(
+        self,
+        db: Session,
+        user_id: int,
+        encrypted_token: str,
+        max_emails: int = 50,
+    ) -> dict:
+        """
+        Fetch emails, parse, and store new transactions.
+        Returns a summary dict.
+        """
+        summary = {
+            "fetched": 0,
+            "skipped_duplicate": 0,
+            "parsed_ok": 0,
+            "parse_failed": 0,
+            "unmatched": 0,
+            "transactions_created": 0,
+        }
+
+        emails = gmail_service.fetch_transaction_emails(encrypted_token, max_results=max_emails)
+        summary["fetched"] = len(emails)
+
+        retention_cutoff = datetime.now(timezone.utc) + timedelta(days=30)
+
+        for email in emails:
+            gmail_id = email["id"]
+
+            # Skip already-processed emails
+            existing = db.query(EmailMetadata).filter(
+                EmailMetadata.gmail_message_id == gmail_id
+            ).first()
+            if existing:
+                summary["skipped_duplicate"] += 1
+                continue
+
+            # Record email metadata
+            meta = EmailMetadata(
+                user_id=user_id,
+                gmail_message_id=gmail_id,
+                sender=email["sender"][:255] if email["sender"] else None,
+                subject=email["subject"][:500] if email["subject"] else None,
+                received_at=email["received_at"],
+                parse_status="pending",
+                delete_after=retention_cutoff,
+            )
+            db.add(meta)
+
+            # Parse — use parse_email(email_dict) which calls get_parser + parser.parse()
+            # Separate unmatched (no parser found → returns None) from parse_failed (parser crashed)
+            parsed = None
+            try:
+                parsed = parse_email(email)
+            except Exception as e:
+                meta.parse_status = "failed"
+                meta.parse_error = str(e)[:500]
+                summary["parse_failed"] += 1
+                db.commit()
+                continue
+
+            if parsed is None:
+                meta.parse_status = "unmatched"
+                meta.parse_error = "No parser matched"
+                summary["unmatched"] += 1
+                db.commit()
+                continue
+
+            # Save transaction — skip if duplicate email_message_id
+            existing_tx = db.query(Transaction).filter(
+                Transaction.email_message_id == gmail_id
+            ).first()
+            if not existing_tx:
+                tx = Transaction(
+                    user_id=user_id,
+                    transaction_date=parsed.transaction_date,
+                    amount=parsed.amount,
+                    description=parsed.description,
+                    merchant=parsed.merchant,
+                    category=parsed.category,
+                    payment_method=parsed.payment_method,
+                    payment_source=parsed.payment_source,
+                    notes=f"Ref: {parsed.reference_number}" if parsed.reference_number else None,
+                    source="email",
+                    email_message_id=gmail_id,
+                )
+                db.add(tx)
+                summary["transactions_created"] += 1
+
+            meta.parse_status = "success"
+            meta.bank_name = parsed.bank_name
+            summary["parsed_ok"] += 1
+            db.commit()
+
+        return summary
+
+
+email_sync_service = EmailSyncService()
