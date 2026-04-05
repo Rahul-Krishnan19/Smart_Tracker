@@ -1,5 +1,5 @@
 """
-Tests for EmailSyncService — RED phase.
+Tests for EmailSyncService.
 
 These tests verify refactored sync service behaviour from Plan 02:
   - unmatched counter in summary dict (emails with no matching parser)
@@ -8,7 +8,7 @@ These tests verify refactored sync service behaviour from Plan 02:
 Tests will FAIL (RED) until Plan 02 refactors the sync service.
 """
 from unittest.mock import MagicMock, patch
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 import pytest
 
@@ -88,3 +88,12 @@ def test_parse_failed_counter(in_memory_db):
         f"Expected unmatched=0 for a parse exception (not an unmatched email), "
         f"got {summary.get('unmatched')}"
     )
+
+
+@pytest.mark.skip(reason="Awaiting INFRA-03 fix in Plan 01 Task 2")
+def test_retention_days_from_settings(in_memory_db):
+    """
+    INFRA-03: email_sync_service uses settings.email_retention_days, not hardcoded 30.
+    Patch settings.email_retention_days to 60 and assert delete_after is ~60 days from now.
+    """
+    pass
