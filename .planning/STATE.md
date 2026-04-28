@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: "04-03 task-1 complete, task-2 pending human verify"
-status: in_progress
-stopped_at: "04-03 Task 1 complete — GmailSync.jsx updated with timestamp + auto-sync UI. Task 2 awaiting human verification."
-last_updated: "2026-04-05T16:43:00Z"
+current_plan: 1
+status: executing
+stopped_at: Completed 05-01-PLAN.md — CategoryRule model, 6 new API routes, CSV export, apply_user_rules integration. All 77 tests green.
+last_updated: "2026-04-28T05:50:59.838Z"
 progress:
   total_phases: 10
-  completed_phases: 1
-  total_plans: 5
-  completed_plans: 6
+  completed_phases: 2
+  total_plans: 10
+  completed_plans: 8
 ---
 
 # Project State
@@ -20,7 +20,7 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-05)
 
 **Core value:** Automatically pull every bank transaction from Gmail and show exactly where your money is going — no manual entry, no spreadsheets.
-**Current focus:** Phase 03 — multi-bank-parsers
+**Current focus:** Phase 05 — data-quality
 
 ---
 
@@ -28,8 +28,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-05)
 
 **Phase:** 4
 **Overall progress:** 22% (Phase 3 complete, Phase 4 in progress)
-**Current Plan:** 04-01 complete — ready for 04-02 (APScheduler jobs + settings route)
-**Status:** In progress
+**Current Plan:** 1
+**Status:** Executing Phase 05
 
 Phase 04 Plan 02 complete: APScheduler lifespan integration, per-user sync jobs, daily cleanup job, PUT /api/gmail/settings route. 42 tests all green.
 
@@ -71,6 +71,10 @@ Phase 04 Plans 01 and 02 complete. Core automated sync is working end-to-end.
 - [Phase 04-02]: register_startup_jobs() re-registers all enabled user jobs from DB on restart (in-memory job store)
 - [Phase 04-03]: formatIST at module level (not inside component) — avoids re-creation on render
 - [Phase 04-03]: Settings section guarded by connected state, timestamp guarded by lastSyncedAt non-null (D-11)
+- [Phase 05-01]: CategoryRule model with contains-only match type; exact/starts_with/regex deferred per D-03
+- [Phase 05-01]: _build_filter_query() helper centralizes all TransactionService filter logic (list/summary/export/merchant-breakdown)
+- [Phase 05-01]: get_summary() now accepts full TransactionFilters so summary respects payment_source and amount range
+- [Phase 05-01]: Static API routes (payment-sources, merchants, etc.) registered before /{tx_id} to avoid FastAPI path conflicts
 
 ## Known Blockers / Flags
 
@@ -89,6 +93,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 | 04 | 01 | 5min | 2 | 10 |
 | 04 | 02 | 6min | 2 | 5 |
 | 04 | 03 | 8min | 1 | 1 |
+| Phase 05 P01 | 11min | 2 tasks | 10 files |
 
 ## Planning Artifacts
 
@@ -111,7 +116,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 
 ## Last Session
 
-**Stopped at:** 04-03 Task 1 complete — GmailSync.jsx updated (timestamp + auto-sync UI). Task 2 awaiting human verification.
+**Stopped at:** Completed 05-01-PLAN.md — CategoryRule model, 6 new API routes, CSV export, apply_user_rules integration. All 77 tests green.
 **Timestamp:** 2026-04-05T16:43:00Z
 
 ---

@@ -23,15 +23,15 @@
 - [x] **TXN-02**: User can edit and delete manually-entered transactions
 - [x] **TXN-03**: Transactions are paginated (50 per page)
 - [x] **TXN-04**: Transactions filterable by date range and category
-- [ ] **TXN-05**: Transaction table supports multi-select filters: category, payment source, merchant, amount range — Phase 5
+- [x] **TXN-05**: Transaction table supports multi-select filters: category, payment source, merchant, amount range — Phase 5
 - [ ] **TXN-06**: Quick date presets: Today / This Week / This Month / Last Month / Last 3M / This Year — Phase 5
-- [ ] **TXN-07**: Filtered view shows total count and sum in table header — Phase 5
-- [ ] **TXN-08**: Filtered view exportable to CSV — Phase 5
-- [ ] **TXN-09**: Transaction table collapses to card list view on mobile — Phase 8
-- [ ] **TXN-10**: Cash transactions supported (payment_method=Cash, payment_source=null) — Phase 5
-- [ ] **TXN-11**: Category re-assignable inline; option to apply to all future transactions from same merchant — Phase 5
-- [ ] **TXN-12**: Bulk category re-assignment (multi-select rows) — Phase 5
-- [ ] **TXN-13**: CSV file upload for bulk import — Phase 5
+- [x] **TXN-07**: Filtered view shows total count and sum in table header — Phase 5
+- [x] **TXN-08**: Filtered view exportable to CSV — Phase 5
+- [x] **TXN-09**: Transaction table collapses to card list view on mobile — Phase 8
+- [x] **TXN-10**: Cash transactions supported (payment_method=Cash, payment_source=null) — Phase 5
+- [x] **TXN-11**: Category re-assignable inline; option to apply to all future transactions from same merchant — Phase 5
+- [x] **TXN-12**: Bulk category re-assignment (multi-select rows) — Phase 5
+- [x] **TXN-13**: CSV file upload for bulk import — Phase 5
 
 ### Gmail Integration
 
@@ -62,19 +62,19 @@
 
 - [x] **CAT-01**: Auto-categorisation on import via keyword matching
 - [x] **CAT-02**: Categories: Rent, Groceries, Shopping, Electricity, Food & Dining, Transport, Entertainment, Healthcare, Others
-- [ ] **CAT-03**: Extended taxonomy: Subscriptions, Utilities, Travel added — Phase 5
-- [ ] **CAT-04**: DB-backed category rules (keyword → category, user-editable) — Phase 5
-- [ ] **CAT-05**: Match types: exact, contains, starts_with, regex — Phase 5
-- [ ] **CAT-06**: Unclassified transactions flagged separately (not lumped into Others) — Phase 5
+- [x] **CAT-03**: Extended taxonomy: Subscriptions, Utilities, Travel added — Phase 5
+- [x] **CAT-04**: DB-backed category rules (keyword → category, user-editable) — Phase 5
+- [x] **CAT-05**: Match types: exact, contains, starts_with, regex — Phase 5
+- [x] **CAT-06**: Unclassified transactions flagged separately (not lumped into Others) — Phase 5
 - [ ] **CAT-07**: Category rules editor in Settings — Phase 5
 
 ### Payment Methods
 
 - [x] **PAY-01**: Payment methods: Credit Card, UPI, Cash, Debit Card, Net Banking, Others
-- [ ] **PAY-02**: payment_source column added (specific card/account, nullable for Cash) — Phase 5
+- [x] **PAY-02**: payment_source column added (specific card/account, nullable for Cash) — Phase 5
 - [ ] **PAY-03**: Multi-select filter by payment source on dashboard and transaction table — Phase 5
 - [ ] **PAY-04**: Analytics charts respond to payment source filter — Phase 5
-- [ ] **PAY-05**: GET /api/payment-sources returns distinct sources for current user — Phase 5
+- [x] **PAY-05**: GET /api/payment-sources returns distinct sources for current user — Phase 5
 
 ### Analytics
 
@@ -84,9 +84,9 @@
 - [ ] **ANA-04**: Category overlay toggle on trend chart — Phase 6
 - [ ] **ANA-05**: Drill-down: clicking trend bar filters transaction table — Phase 6
 - [ ] **ANA-06**: Period comparison callout: "X% more/less vs last period" — Phase 6
-- [ ] **ANA-07**: Merchant breakdown table (total, count, avg, % of total, payment split) — Phase 5
+- [x] **ANA-07**: Merchant breakdown table (total, count, avg, % of total, payment split) — Phase 5
 - [ ] **ANA-08**: Top 10 merchants by spend on main dashboard — Phase 5
-- [ ] **ANA-09**: Merchant autocomplete for transaction filter — Phase 5
+- [x] **ANA-09**: Merchant autocomplete for transaction filter — Phase 5
 
 ### Budgets & Goals
 
