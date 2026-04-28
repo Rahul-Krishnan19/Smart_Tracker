@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: executing
-stopped_at: Completed 05-01-PLAN.md — CategoryRule model, 6 new API routes, CSV export, apply_user_rules integration. All 77 tests green.
-last_updated: "2026-04-28T05:50:59.838Z"
+stopped_at: Completed 05-02 Tasks 1-2 — FilterPanel, TransactionList, TransactionsPage wiring. Paused at Task 3 human-verify checkpoint.
+last_updated: "2026-04-28T17:05:07.192Z"
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -75,6 +75,8 @@ Phase 04 Plans 01 and 02 complete. Core automated sync is working end-to-end.
 - [Phase 05-01]: _build_filter_query() helper centralizes all TransactionService filter logic (list/summary/export/merchant-breakdown)
 - [Phase 05-01]: get_summary() now accepts full TransactionFilters so summary respects payment_source and amount range
 - [Phase 05-01]: Static API routes (payment-sources, merchants, etc.) registered before /{tx_id} to avoid FastAPI path conflicts
+- [Phase 05-02]: fetchSummary passes all active filters directly (not just date_from/date_to) — summary now reflects full filter state
+- [Phase 05-02]: Merchant autocomplete uses native datalist element — no third-party library required
 
 ## Known Blockers / Flags
 
@@ -94,6 +96,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 | 04 | 02 | 6min | 2 | 5 |
 | 04 | 03 | 8min | 1 | 1 |
 | Phase 05 P01 | 11min | 2 tasks | 10 files |
+| Phase 05 P02 | 10min | 2 tasks | 4 files |
 
 ## Planning Artifacts
 
@@ -116,7 +119,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 
 ## Last Session
 
-**Stopped at:** Completed 05-01-PLAN.md — CategoryRule model, 6 new API routes, CSV export, apply_user_rules integration. All 77 tests green.
+**Stopped at:** Completed 05-02 Tasks 1-2 — FilterPanel, TransactionList, TransactionsPage wiring. Paused at Task 3 human-verify checkpoint.
 **Timestamp:** 2026-04-05T16:43:00Z
 
 ---

@@ -24,7 +24,7 @@
 - [x] **TXN-03**: Transactions are paginated (50 per page)
 - [x] **TXN-04**: Transactions filterable by date range and category
 - [x] **TXN-05**: Transaction table supports multi-select filters: category, payment source, merchant, amount range — Phase 5
-- [ ] **TXN-06**: Quick date presets: Today / This Week / This Month / Last Month / Last 3M / This Year — Phase 5
+- [x] **TXN-06**: Quick date presets: Today / This Week / This Month / Last Month / Last 3M / This Year — Phase 5
 - [x] **TXN-07**: Filtered view shows total count and sum in table header — Phase 5
 - [x] **TXN-08**: Filtered view exportable to CSV — Phase 5
 - [x] **TXN-09**: Transaction table collapses to card list view on mobile — Phase 8
@@ -66,13 +66,13 @@
 - [x] **CAT-04**: DB-backed category rules (keyword → category, user-editable) — Phase 5
 - [x] **CAT-05**: Match types: exact, contains, starts_with, regex — Phase 5
 - [x] **CAT-06**: Unclassified transactions flagged separately (not lumped into Others) — Phase 5
-- [ ] **CAT-07**: Category rules editor in Settings — Phase 5
+- [x] **CAT-07**: Category rules editor in Settings — Phase 5
 
 ### Payment Methods
 
 - [x] **PAY-01**: Payment methods: Credit Card, UPI, Cash, Debit Card, Net Banking, Others
 - [x] **PAY-02**: payment_source column added (specific card/account, nullable for Cash) — Phase 5
-- [ ] **PAY-03**: Multi-select filter by payment source on dashboard and transaction table — Phase 5
+- [x] **PAY-03**: Multi-select filter by payment source on dashboard and transaction table — Phase 5
 - [ ] **PAY-04**: Analytics charts respond to payment source filter — Phase 5
 - [x] **PAY-05**: GET /api/payment-sources returns distinct sources for current user — Phase 5
 
