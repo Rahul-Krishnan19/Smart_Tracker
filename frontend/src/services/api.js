@@ -50,6 +50,7 @@ export const transactionsApi = {
   merchants: (q) => api.get('/transactions/merchants', { params: { q } }),
   bulkCategorize: (data) => api.post('/transactions/bulk-categorize', data),
   updateCategory: (id, data) => api.put(`/transactions/${id}/category`, data),
+  merchantBreakdown: (params) => api.get('/transactions/merchant-breakdown', { params }),
 }
 
 export default api
