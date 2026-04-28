@@ -24,7 +24,7 @@ Per-category budgets (BUDGET-01–04) and savings goals (GOAL-01–03) are expli
 
 ### Burn-Rate Projection
 - **D-06:** Projected end-of-period total shown as a KPI card: "At this rate: ₹X by [end of period]". Linear extrapolation: `(spend_so_far / days_elapsed) * total_days_in_period`.
-- **D-07:** User can set a spending limit for the active granularity inline on the Analytics page (a simple editable number field next to the burn-rate card). When a limit is set, show "₹X of ₹LIMIT (Y%)" with a subtle progress indicator.
+- **D-07:** Spending limit is always visible on the Analytics page next to the burn-rate card — an always-editable input field (not click-to-reveal). User can change the value at any time; saving is immediate (on blur or Enter). When a limit is set, show "₹X of ₹LIMIT (Y%)" with a subtle progress indicator. When no limit is set (empty), the burn-rate card shows projection only.
 - **D-08:** Spending limits are stored in DB per granularity (separate limit for Daily / Weekly / Monthly / Annual). New `SpendingLimit` table: `(id, user_id, granularity, amount)` with a unique constraint on `(user_id, granularity)`. Backend: `GET /api/spending-limit?granularity=X` and `PUT /api/spending-limit` `{ granularity, amount }`.
 - **D-09:** Burn-rate projection only meaningful when viewing a period that is currently in progress (e.g., current month). If date range is fully in the past, show actual total only (no projection).
 
@@ -35,7 +35,7 @@ Per-category budgets (BUDGET-01–04) and savings goals (GOAL-01–03) are expli
 ### Claude's Discretion
 - Exact visual style of the trend line (smooth curve vs straight segments, fill area vs line-only) — Claude picks what looks cleanest with the existing chart style.
 - Empty state for the trend chart when no data exists for the selected period.
-- How the spending limit edit is triggered (click to edit inline, or always-visible input).
+- Visual style of the editable spending limit field (pencil icon, underline input, etc.).
 
 </decisions>
 
