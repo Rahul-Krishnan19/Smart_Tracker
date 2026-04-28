@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: executing
-stopped_at: Completed 05-02 Tasks 1-2 — FilterPanel, TransactionList, TransactionsPage wiring. Paused at Task 3 human-verify checkpoint.
-last_updated: "2026-04-28T17:05:07.192Z"
+stopped_at: Completed 05-03 Task 1 — AnalyticsPage payment source filter + merchant breakdown table. Paused at Task 2 human-verify checkpoint.
+last_updated: "2026-04-28T21:51:25Z"
 progress:
   total_phases: 10
   completed_phases: 2
@@ -77,6 +77,9 @@ Phase 04 Plans 01 and 02 complete. Core automated sync is working end-to-end.
 - [Phase 05-01]: Static API routes (payment-sources, merchants, etc.) registered before /{tx_id} to avoid FastAPI path conflicts
 - [Phase 05-02]: fetchSummary passes all active filters directly (not just date_from/date_to) — summary now reflects full filter state
 - [Phase 05-02]: Merchant autocomplete uses native datalist element — no third-party library required
+- [Phase 05-03]: merchantBreakdown was only missing API method — paymentSources already present from Plan 02
+- [Phase 05-03]: handleApply() calls both fetchSummary and fetchMerchantBreakdown — single handler keeps all filters in sync
+- [Phase 05-03]: payment_source conditionally appended to params (if truthy) to avoid sending empty string to backend
 
 ## Known Blockers / Flags
 
@@ -97,6 +100,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 | 04 | 03 | 8min | 1 | 1 |
 | Phase 05 P01 | 11min | 2 tasks | 10 files |
 | Phase 05 P02 | 10min | 2 tasks | 4 files |
+| 05 | 03 | 2min | 1 task (checkpoint) | 2 files |
 
 ## Planning Artifacts
 
@@ -114,13 +118,14 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 | `.planning/phases/04-automated-email-sync/04-01-SUMMARY.md` | ✅ Complete |
 | `.planning/phases/04-automated-email-sync/04-02-SUMMARY.md` | ✅ Complete |
 | `.planning/phases/04-automated-email-sync/04-03-SUMMARY.md` | Task 1 complete — Task 2 pending human verify |
+| `.planning/phases/05-data-quality/05-03-SUMMARY.md` | Task 1 complete — Task 2 pending human verify |
 
 ---
 
 ## Last Session
 
-**Stopped at:** Completed 05-02 Tasks 1-2 — FilterPanel, TransactionList, TransactionsPage wiring. Paused at Task 3 human-verify checkpoint.
-**Timestamp:** 2026-04-05T16:43:00Z
+**Stopped at:** Completed 05-03 Task 1 — AnalyticsPage payment source filter + merchant breakdown table. Paused at Task 2 human-verify checkpoint.
+**Timestamp:** 2026-04-28T21:51:25Z
 
 ---
-*State last updated: 2026-04-05 (Plan 04-02 complete — background sync fully operational)*
+*State last updated: 2026-04-28 (Plan 05-03 Task 1 complete — AnalyticsPage enhancements done)*

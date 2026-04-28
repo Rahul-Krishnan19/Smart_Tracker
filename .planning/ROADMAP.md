@@ -99,12 +99,12 @@ Plans:
   5. Filtered transaction view exportable to CSV
   6. CSV file upload imports transactions in bulk
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans executed (Task 2 of plan 03 pending human verify)
 
 Plans:
-- [x] 05-01-PLAN.md -- TBD
-- [x] 05-02-PLAN.md -- TBD
-- [ ] 05-03-PLAN.md -- TBD
+- [x] 05-01-PLAN.md -- CategoryRule model, _build_filter_query, payment-sources/merchant-breakdown/summary APIs
+- [x] 05-02-PLAN.md -- FilterPanel, TransactionList, TransactionsPage wiring with payment_source + merchant filters
+- [x] 05-03-PLAN.md -- AnalyticsPage: payment source filter dropdown + merchant breakdown table (top 10)
 
 ### Phase 6: Analytics & Trends
 **Goal**: Turn transaction data into a time story with trend charts, category budgets, and monthly spending goals
@@ -201,7 +201,7 @@ Plans:
 | 2. Gmail OAuth + HDFC Parsing | 3/3 | Complete | 2026-04 |
 | 3. Multi-Bank Parsers | 3/3 | Complete    | 2026-04-05 |
 | 4. Automated Email Sync | 0/3 | Planned | - |
-| 5. Data Quality | 2/3 | In Progress|  |
+| 5. Data Quality | 3/3 | In Progress (awaiting human-verify) | 2026-04-28 |
 | 6. Analytics & Trends | 0/TBD | Not started | - |
 | 7. Pattern Detection & Insights | 0/TBD | Not started | - |
 | 8. Polish & Publishing | 0/TBD | Not started | - |
