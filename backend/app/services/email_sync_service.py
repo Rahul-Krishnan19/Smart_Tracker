@@ -13,6 +13,7 @@ from app.models.email_metadata import EmailMetadata
 from app.models.transaction import Transaction
 from app.services.gmail_service import gmail_service
 from app.parsers.parser_factory import get_parser, parse_email
+from app.services.category_rule_service import apply_user_rules
 
 
 class EmailSyncService:
@@ -45,25 +46,31 @@ class EmailSyncService:
         for email in emails:
             gmail_id = email["id"]
 
-            # Skip already-processed emails
+            # Skip only emails that were successfully parsed — re-process unmatched/failed ones
             existing = db.query(EmailMetadata).filter(
                 EmailMetadata.gmail_message_id == gmail_id
             ).first()
-            if existing:
+            if existing and existing.parse_status == "success":
                 summary["skipped_duplicate"] += 1
                 continue
 
-            # Record email metadata
-            meta = EmailMetadata(
-                user_id=user_id,
-                gmail_message_id=gmail_id,
-                sender=email["sender"][:255] if email["sender"] else None,
-                subject=email["subject"][:500] if email["subject"] else None,
-                received_at=email["received_at"],
-                parse_status="pending",
-                delete_after=retention_cutoff,
-            )
-            db.add(meta)
+            if existing:
+                # Re-process previously failed/unmatched email
+                meta = existing
+                meta.parse_status = "pending"
+                meta.parse_error = None
+            else:
+                # New email — record metadata
+                meta = EmailMetadata(
+                    user_id=user_id,
+                    gmail_message_id=gmail_id,
+                    sender=email["sender"][:255] if email["sender"] else None,
+                    subject=email["subject"][:500] if email["subject"] else None,
+                    received_at=email["received_at"],
+                    parse_status="pending",
+                    delete_after=retention_cutoff,
+                )
+                db.add(meta)
 
             # Parse — use parse_email(email_dict) which calls get_parser + parser.parse()
             # Separate unmatched (no parser found → returns None) from parse_failed (parser crashed)
@@ -83,6 +90,11 @@ class EmailSyncService:
                 summary["unmatched"] += 1
                 db.commit()
                 continue
+
+            # Apply user-defined category rules — overrides parser's category if matched
+            user_cat = apply_user_rules(db, user_id, parsed.merchant or "", parsed.description)
+            if user_cat:
+                parsed.category = user_cat
 
             # Save transaction — skip if duplicate email_message_id
             existing_tx = db.query(Transaction).filter(
