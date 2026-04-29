@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { transactionsApi } from '../services/api'
 import TransactionList from '../components/transactions/TransactionList'
 import TransactionForm from '../components/transactions/TransactionForm'
@@ -10,8 +11,17 @@ function formatAmount(amount) {
 }
 
 export default function TransactionsPage() {
+  const [searchParams] = useSearchParams()
+  const [initialFilters] = useState(() => {
+    const init = {}
+    const df = searchParams.get('date_from')
+    const dt = searchParams.get('date_to')
+    if (df) init.date_from = df
+    if (dt) init.date_to = dt
+    return init
+  })
   const [data, setData] = useState({ items: [], total: 0, page: 1, page_size: 50, total_pages: 1 })
-  const [filters, setFilters] = useState({})
+  const [filters, setFilters] = useState(initialFilters)
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const [addLoading, setAddLoading] = useState(false)
@@ -121,7 +131,7 @@ export default function TransactionsPage() {
       </div>
 
       {/* Filters */}
-      <FilterPanel onFilter={handleFilter} loading={loading} />
+      <FilterPanel onFilter={handleFilter} loading={loading} defaultValues={initialFilters} />
 
       {/* Alerts */}
       {error && (

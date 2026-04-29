@@ -15,8 +15,8 @@ const DATE_PRESETS = [
   { label: 'This Year', from: () => startOfYear(new Date()), to: () => endOfDay(new Date()) },
 ]
 
-export default function FilterPanel({ onFilter, loading }) {
-  const { register, handleSubmit, reset, setValue } = useForm()
+export default function FilterPanel({ onFilter, loading, defaultValues = {} }) {
+  const { register, handleSubmit, reset, setValue } = useForm({ defaultValues })
   const [paymentSources, setPaymentSources] = useState([])
   const [merchantSuggestions, setMerchantSuggestions] = useState([])
   const debounceRef = useRef(null)

@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
-import { transactionsApi } from '../services/api'
+import { transactionsApi, analyticsApi } from '../services/api'
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from 'recharts'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
+import TrendChart from '../components/analytics/TrendChart'
+import BurnRateCard from '../components/analytics/BurnRateCard'
+import GranularityToggle from '../components/analytics/GranularityToggle'
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#94a3b8']
 
@@ -20,6 +23,11 @@ export default function AnalyticsPage() {
   const [paymentSource, setPaymentSource] = useState('')
   const [paymentSources, setPaymentSources] = useState([])
   const [merchantData, setMerchantData] = useState(null)
+  const [granularity, setGranularity] = useState('monthly')
+  const [trendData, setTrendData] = useState(null)
+  const [pctChange, setPctChange] = useState(null)
+  const [previousTotal, setPreviousTotal] = useState(0)
+  const [categoryOverlay, setCategoryOverlay] = useState(false)
 
   // Fetch payment sources on mount
   useEffect(() => {
@@ -53,15 +61,36 @@ export default function AnalyticsPage() {
     }
   }
 
+  async function fetchTrend(currentGranularity = granularity) {
+    try {
+      const params = { granularity: currentGranularity, date_from: dateFrom, date_to: dateTo }
+      if (paymentSource) params.payment_source = paymentSource
+      const res = await analyticsApi.trend(params)
+      setTrendData(res.data.trend)
+      setPctChange(res.data.pct_change)
+      setPreviousTotal(res.data.previous_total)
+    } catch {
+      setTrendData([])
+      setPctChange(null)
+      setPreviousTotal(0)
+    }
+  }
+
   function handleApply() {
     fetchSummary()
     fetchMerchantBreakdown()
+    fetchTrend()
   }
 
   useEffect(() => {
     fetchSummary()
     fetchMerchantBreakdown()
+    fetchTrend()
   }, [])
+
+  useEffect(() => {
+    fetchTrend(granularity)
+  }, [granularity])
 
   return (
     <div className="space-y-6">
@@ -90,6 +119,49 @@ export default function AnalyticsPage() {
           <button onClick={handleApply} disabled={loading} className="btn-primary">
             {loading ? 'Loading…' : 'Apply'}
           </button>
+        </div>
+      </div>
+
+      {/* Trend section (Phase 6) */}
+      <div className="card">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3">
+            <h3 className="text-sm font-semibold text-gray-700">Spending over time</h3>
+            {pctChange != null && (
+              <span
+                className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  pctChange > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                }`}
+                title={`Previous period: ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(previousTotal)}`}
+              >
+                {pctChange > 0 ? '▲' : '▼'} {Math.abs(pctChange).toFixed(1)}% vs last period
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-1 text-xs text-gray-600">
+              <input
+                type="checkbox"
+                checked={categoryOverlay}
+                onChange={(e) => setCategoryOverlay(e.target.checked)}
+              />
+              Category overlay
+            </label>
+            <GranularityToggle value={granularity} onChange={setGranularity} />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2">
+            <TrendChart data={trendData ?? []} categoryOverlay={categoryOverlay} />
+          </div>
+          <div>
+            <BurnRateCard
+              granularity={granularity}
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              currentTotal={summary?.total_amount ?? 0}
+            />
+          </div>
         </div>
       </div>
 
