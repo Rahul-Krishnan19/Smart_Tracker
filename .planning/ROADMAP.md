@@ -107,21 +107,23 @@ Plans:
 - [x] 05-03-PLAN.md -- AnalyticsPage: payment source filter dropdown + merchant breakdown table (top 10)
 
 ### Phase 6: Analytics & Trends
-**Goal**: Turn transaction data into a time story with trend charts, category budgets, and monthly spending goals
+**Goal**: Turn transaction data into a time story — trend chart with granularity toggle, click-through to filtered transactions, and burn-rate projection with per-granularity spending limit
 **Depends on**: Phase 5
-**Requirements**: ANA-03, ANA-04, ANA-05, ANA-06, BUDGET-01, BUDGET-02, BUDGET-03, BUDGET-04, GOAL-01, GOAL-02, GOAL-03
+**Requirements**: ANA-03, ANA-04, ANA-05, ANA-06, GOAL-02
+**Note**: BUDGET-01–04 (per-category budgets) and GOAL-01, GOAL-03 (savings goals) deferred per CONTEXT.md D-10/D-11
 **Success Criteria** (what must be TRUE):
   1. Trend chart shows spend over time with Daily/Weekly/Monthly/Annual toggle
-  2. Clicking a trend bar filters the transaction table to that period
-  3. User can set monthly budget per category; dashboard shows progress bars
-  4. User can set a monthly savings goal; dashboard shows burn-rate projection
+  2. Clicking a trend data point navigates to /transactions pre-filtered to that period
+  3. Period comparison badge shows "X% more/less vs last period"
+  4. Burn-rate projection card shows projected month-end spend when viewing current period
+  5. User can set a per-granularity spending limit; card shows progress and turns red when over
 
 **Plans:** 3 plans
 
 Plans:
-- [ ] 06-01-PLAN.md -- TBD
-- [ ] 06-02-PLAN.md -- TBD
-- [ ] 06-03-PLAN.md -- TBD
+- [ ] 06-01-PLAN.md -- TrendService (SQLite strftime grouping), analytics schemas, GET /api/analytics/trend, 13 pytest unit tests
+- [ ] 06-02-PLAN.md -- SpendingLimit model + Alembic migration + GET/PUT/DELETE /api/analytics/spending-limit, 10 pytest tests
+- [ ] 06-03-PLAN.md -- TrendChart (Recharts AreaChart), GranularityToggle, BurnRateCard, AnalyticsPage wiring, URL-param seeding for TransactionsPage
 
 ### Phase 7: Pattern Detection & Insights
 **Goal**: Surface anomalies, recurring charges, and spending patterns automatically using rule-based detection
@@ -202,7 +204,7 @@ Plans:
 | 3. Multi-Bank Parsers | 3/3 | Complete    | 2026-04-05 |
 | 4. Automated Email Sync | 0/3 | Planned | - |
 | 5. Data Quality | 3/3 | In Progress (awaiting human-verify) | 2026-04-28 |
-| 6. Analytics & Trends | 0/TBD | Not started | - |
+| 6. Analytics & Trends | 0/3 | Planned | - |
 | 7. Pattern Detection & Insights | 0/TBD | Not started | - |
 | 8. Polish & Publishing | 0/TBD | Not started | - |
 | 9. Security Hardening | 0/TBD | Not started | - |
