@@ -100,14 +100,14 @@
 
 ### Insights & Patterns
 
-- [ ] **INS-01**: Anomaly detection runs after each sync (rule-based, 4 rules) — Phase 7
-- [ ] **INS-02**: Alerts badge shows unreviewed anomaly count — Phase 7
-- [ ] **INS-03**: User can dismiss or mark anomaly for investigation — Phase 7
-- [ ] **INS-04**: Recurring transaction detection (same merchant, similar amount, 2+ months) — Phase 7
-- [ ] **INS-05**: Subscriptions list with estimated monthly total — Phase 7
+- [x] **INS-01**: Anomaly detection runs after each sync (rule-based, 4 rules) — Phase 7
+- [x] **INS-02**: Alerts badge shows unreviewed anomaly count — Phase 7
+- [x] **INS-03**: User can dismiss or mark anomaly for investigation — Phase 7
+- [x] **INS-04**: Recurring transaction detection (same merchant, similar amount, 2+ months) — Phase 7
+- [x] **INS-05**: Subscriptions list with estimated monthly total — Phase 7
 - [ ] **INS-06**: Alert if known recurring charge missing for current month — Phase 7
-- [ ] **INS-07**: Rule-based insights feed (up to 5, computed daily, dismissible) — Phase 7
-- [ ] **INS-08**: Insights cached in DB — not recomputed on every page load — Phase 7
+- [x] **INS-07**: Rule-based insights feed (up to 5, computed daily, dismissible) — Phase 7
+- [x] **INS-08**: Insights cached in DB — not recomputed on every page load — Phase 7
 
 ### UX & Polish
 

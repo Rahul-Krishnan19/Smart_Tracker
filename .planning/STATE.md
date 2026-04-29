@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: executing
-stopped_at: "Checkpoint 06-03 Task 3: manual verification of trend chart, click-through, spending-limit flow"
-last_updated: "2026-04-29T14:40:40.165Z"
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-04-29T22:02:27.642Z"
 progress:
   total_phases: 10
   completed_phases: 4
-  total_plans: 13
-  completed_plans: 13
+  total_plans: 16
+  completed_plans: 14
 ---
 
 # Project State
@@ -20,7 +20,7 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-05)
 
 **Core value:** Automatically pull every bank transaction from Gmail and show exactly where your money is going — no manual entry, no spreadsheets.
-**Current focus:** Phase 06 — analytics-trends
+**Current focus:** Phase 07 — pattern-detection-insights
 
 ---
 
@@ -29,7 +29,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-05)
 **Phase:** 6
 **Overall progress:** 22% (Phase 3 complete, Phase 4 in progress)
 **Current Plan:** 1
-**Status:** Executing Phase 06
+**Status:** Executing Phase 07
 
 Phase 04 Plan 02 complete: APScheduler lifespan integration, per-user sync jobs, daily cleanup job, PUT /api/gmail/settings route. 42 tests all green.
 
@@ -88,6 +88,8 @@ Phase 04 Plans 01 and 02 complete. Core automated sync is working end-to-end.
 - [Phase 06]: Burn-rate computed on frontend: backend trend response has current_total; frontend divides by days_elapsed and projects to period_end — keeps backend simple
 - [Phase 06]: analyticsApi as separate export namespace (not merged into transactionsApi): different route prefix /api/analytics
 - [Phase 06]: useSearchParams initial value in useState lazy initializer: reads params once at mount, stable reference for useCallback dependencies
+- [Phase 07]: transaction_id is nullable on Anomaly to support missing_subscription rule (no transaction to link)
+- [Phase 07]: ANOMALY_SEVERITY dict in insights_config.py centralizes rule-to-severity mapping for InsightService
 
 ## Known Blockers / Flags
 
@@ -111,6 +113,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 | 05 | 03 | 2min | 1 task (checkpoint) | 2 files |
 | Phase 06 P01 | 4min | 3 tasks | 5 files |
 | Phase 06 P02 | 8min | 2 tasks | 8 files |
+| Phase 07 P01 | 10 | 3 tasks | 8 files |
 
 ## Planning Artifacts
 
@@ -134,7 +137,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 
 ## Last Session
 
-**Stopped at:** Checkpoint 06-03 Task 3: manual verification of trend chart, click-through, spending-limit flow
+**Stopped at:** Completed 07-01-PLAN.md
 **Timestamp:** 2026-04-28T21:51:25Z
 
 ---
