@@ -19,7 +19,7 @@ if config.config_file_name is not None:
 
 # Import all models here for autogenerate support
 from app.database import Base
-from app.models import user, transaction, email_metadata, session, category_rule
+from app.models import user, transaction, email_metadata, session, category_rule, spending_limit
 
 # add your model's MetaData object here
 # for 'autogenerate' support
