@@ -118,10 +118,10 @@ Plans:
   4. Burn-rate projection card shows projected month-end spend when viewing current period
   5. User can set a per-granularity spending limit; card shows progress and turns red when over
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
-- [ ] 06-01-PLAN.md -- TrendService (SQLite strftime grouping), analytics schemas, GET /api/analytics/trend, 13 pytest unit tests
+- [x] 06-01-PLAN.md -- TrendService (SQLite strftime grouping), analytics schemas, GET /api/analytics/trend, 13 pytest unit tests
 - [ ] 06-02-PLAN.md -- SpendingLimit model + Alembic migration + GET/PUT/DELETE /api/analytics/spending-limit, 10 pytest tests
 - [ ] 06-03-PLAN.md -- TrendChart (Recharts AreaChart), GranularityToggle, BurnRateCard, AnalyticsPage wiring, URL-param seeding for TransactionsPage
 
@@ -204,7 +204,7 @@ Plans:
 | 3. Multi-Bank Parsers | 3/3 | Complete    | 2026-04-05 |
 | 4. Automated Email Sync | 0/3 | Planned | - |
 | 5. Data Quality | 3/3 | In Progress (awaiting human-verify) | 2026-04-28 |
-| 6. Analytics & Trends | 0/3 | Planned | - |
+| 6. Analytics & Trends | 1/3 | In Progress|  |
 | 7. Pattern Detection & Insights | 0/TBD | Not started | - |
 | 8. Polish & Publishing | 0/TBD | Not started | - |
 | 9. Security Hardening | 0/TBD | Not started | - |

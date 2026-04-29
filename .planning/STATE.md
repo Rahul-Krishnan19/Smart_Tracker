@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: Not started
-status: planning
-stopped_at: Completed 05-03 Task 1 — AnalyticsPage payment source filter + merchant breakdown table. Paused at Task 2 human-verify checkpoint.
-last_updated: "2026-04-28T22:29:35.053Z"
+current_plan: 1
+status: executing
+stopped_at: "Completed 06-01: TrendService backend, GET /api/analytics/trend, 91 tests green"
+last_updated: "2026-04-29T07:07:54.586Z"
 progress:
   total_phases: 10
   completed_phases: 3
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 13
+  completed_plans: 11
 ---
 
 # Project State
@@ -20,7 +20,7 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-05)
 
 **Core value:** Automatically pull every bank transaction from Gmail and show exactly where your money is going — no manual entry, no spreadsheets.
-**Current focus:** Phase 05 — data-quality
+**Current focus:** Phase 06 — analytics-trends
 
 ---
 
@@ -28,8 +28,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-05)
 
 **Phase:** 6
 **Overall progress:** 22% (Phase 3 complete, Phase 4 in progress)
-**Current Plan:** Not started
-**Status:** Ready to plan
+**Current Plan:** 1
+**Status:** Executing Phase 06
 
 Phase 04 Plan 02 complete: APScheduler lifespan integration, per-user sync jobs, daily cleanup job, PUT /api/gmail/settings route. 42 tests all green.
 
@@ -80,6 +80,8 @@ Phase 04 Plans 01 and 02 complete. Core automated sync is working end-to-end.
 - [Phase 05-03]: merchantBreakdown was only missing API method — paymentSources already present from Plan 02
 - [Phase 05-03]: handleApply() calls both fetchSummary and fetchMerchantBreakdown — single handler keeps all filters in sync
 - [Phase 05-03]: payment_source conditionally appended to params (if truthy) to avoid sending empty string to backend
+- [Phase 06]: Weekly period_start computed from Monday of min_date (data-driven) — avoids SQLite %W vs ISO week mismatch
+- [Phase 06]: category_totals always included in trend response via second SQL pass — frontend ignores when overlay off; avoids extra endpoint
 
 ## Known Blockers / Flags
 
@@ -101,6 +103,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 | Phase 05 P01 | 11min | 2 tasks | 10 files |
 | Phase 05 P02 | 10min | 2 tasks | 4 files |
 | 05 | 03 | 2min | 1 task (checkpoint) | 2 files |
+| Phase 06 P01 | 4min | 3 tasks | 5 files |
 
 ## Planning Artifacts
 
@@ -124,7 +127,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 
 ## Last Session
 
-**Stopped at:** Completed 05-03 Task 1 — AnalyticsPage payment source filter + merchant breakdown table. Paused at Task 2 human-verify checkpoint.
+**Stopped at:** Completed 06-01: TrendService backend, GET /api/analytics/trend, 91 tests green
 **Timestamp:** 2026-04-28T21:51:25Z
 
 ---

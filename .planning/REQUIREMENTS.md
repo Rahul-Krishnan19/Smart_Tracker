@@ -80,10 +80,10 @@
 
 - [x] **ANA-01**: Category breakdown (pie chart) for selected date range
 - [x] **ANA-02**: Payment method breakdown (bar chart) for selected date range
-- [ ] **ANA-03**: Trend chart with granularity toggle: Daily / Weekly / Monthly / Annual — Phase 6
-- [ ] **ANA-04**: Category overlay toggle on trend chart — Phase 6
-- [ ] **ANA-05**: Drill-down: clicking trend bar filters transaction table — Phase 6
-- [ ] **ANA-06**: Period comparison callout: "X% more/less vs last period" — Phase 6
+- [x] **ANA-03**: Trend chart with granularity toggle: Daily / Weekly / Monthly / Annual — Phase 6
+- [x] **ANA-04**: Category overlay toggle on trend chart — Phase 6
+- [x] **ANA-05**: Drill-down: clicking trend bar filters transaction table — Phase 6
+- [x] **ANA-06**: Period comparison callout: "X% more/less vs last period" — Phase 6
 - [x] **ANA-07**: Merchant breakdown table (total, count, avg, % of total, payment split) — Phase 5
 - [ ] **ANA-08**: Top 10 merchants by spend on main dashboard — Phase 5
 - [x] **ANA-09**: Merchant autocomplete for transaction filter — Phase 5
