@@ -1,6 +1,7 @@
 """
-Analytics API routes — trend aggregation endpoint.
+Analytics API routes — trend aggregation and spending-limit endpoints.
 Phase 6, Plan 01 — ANA-03, ANA-04, ANA-05, ANA-06
+Phase 6, Plan 02 — GOAL-02 (spending limit CRUD)
 """
 from datetime import date
 from typing import Optional
@@ -13,6 +14,12 @@ from app.models.user import User
 from app.api.routes.auth import get_current_user
 from app.services.trend_service import trend_service, GRANULARITY_FORMAT
 from app.schemas.analytics import TrendResponse
+from app.schemas.spending_limit import SpendingLimitOut, SpendingLimitUpsert, Granularity
+from app.services.spending_limit_service import (
+    get_spending_limit as _get_limit,
+    upsert_spending_limit as _upsert_limit,
+    delete_spending_limit as _delete_limit,
+)
 
 router = APIRouter()
 
@@ -56,3 +63,50 @@ def get_trend(
         date_to=date_to,
         payment_source=payment_source,
     )
+
+
+@router.get("/spending-limit", response_model=SpendingLimitOut)
+def read_spending_limit(
+    granularity: Granularity = Query(..., description="daily | weekly | monthly | annual"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """GOAL-02: Retrieve the spending limit for the given granularity.
+
+    Returns {granularity, amount} when a limit is set,
+    or {granularity, amount: null} when no limit is configured.
+    """
+    row = _get_limit(db, current_user.id, granularity)
+    return SpendingLimitOut(
+        granularity=granularity,
+        amount=float(row.amount) if row else None,
+    )
+
+
+@router.put("/spending-limit", response_model=SpendingLimitOut)
+def upsert_spending_limit_route(
+    data: SpendingLimitUpsert,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """GOAL-02: Create or update the spending limit for a given granularity.
+
+    Body: {granularity: "daily"|"weekly"|"monthly"|"annual", amount: > 0}
+    Returns the persisted SpendingLimitOut.
+    """
+    row = _upsert_limit(db, current_user.id, data.granularity, data.amount)
+    return SpendingLimitOut(granularity=row.granularity, amount=float(row.amount))
+
+
+@router.delete("/spending-limit", status_code=204)
+def delete_spending_limit_route(
+    granularity: Granularity = Query(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """GOAL-02: Remove the spending limit for the given granularity (idempotent).
+
+    Returns 204 whether or not a limit existed.
+    """
+    _delete_limit(db, current_user.id, granularity)
+    return None
