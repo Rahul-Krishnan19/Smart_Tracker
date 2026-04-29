@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: executing
-stopped_at: "Completed 06-01: TrendService backend, GET /api/analytics/trend, 91 tests green"
-last_updated: "2026-04-29T07:07:54.586Z"
+stopped_at: "Completed 06-02: SpendingLimit table, CRUD endpoints, 101 tests green"
+last_updated: "2026-04-29T07:13:04.747Z"
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State
@@ -82,6 +82,9 @@ Phase 04 Plans 01 and 02 complete. Core automated sync is working end-to-end.
 - [Phase 05-03]: payment_source conditionally appended to params (if truthy) to avoid sending empty string to backend
 - [Phase 06]: Weekly period_start computed from Monday of min_date (data-driven) — avoids SQLite %W vs ISO week mismatch
 - [Phase 06]: category_totals always included in trend response via second SQL pass — frontend ignores when overlay off; avoids extra endpoint
+- [Phase 06]: Decimal in SpendingLimitUpsert body, float in SpendingLimitOut response — Field(gt=0) validates positivity; float is JSON-safe
+- [Phase 06]: Upsert via get-then-update pattern (not ON CONFLICT) — SQLite-compatible and consistent with category_rule_service
+- [Phase 06]: Idempotent DELETE returns 204 unconditionally — service returns bool for testability but route ignores it
 
 ## Known Blockers / Flags
 
@@ -104,6 +107,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 | Phase 05 P02 | 10min | 2 tasks | 4 files |
 | 05 | 03 | 2min | 1 task (checkpoint) | 2 files |
 | Phase 06 P01 | 4min | 3 tasks | 5 files |
+| Phase 06 P02 | 8min | 2 tasks | 8 files |
 
 ## Planning Artifacts
 
@@ -127,7 +131,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 
 ## Last Session
 
-**Stopped at:** Completed 06-01: TrendService backend, GET /api/analytics/trend, 91 tests green
+**Stopped at:** Completed 06-02: SpendingLimit table, CRUD endpoints, 101 tests green
 **Timestamp:** 2026-04-28T21:51:25Z
 
 ---

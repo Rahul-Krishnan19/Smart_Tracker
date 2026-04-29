@@ -95,7 +95,7 @@
 - [ ] **BUDGET-03**: Summary card: "X of Y budgets on track this month" — Phase 6
 - [ ] **BUDGET-04**: Budgets auto-reset at start of each calendar month — Phase 6
 - [ ] **GOAL-01**: User sets optional monthly savings target — Phase 6
-- [ ] **GOAL-02**: Dashboard shows projected month-end spend based on burn rate — Phase 6
+- [x] **GOAL-02**: Dashboard shows projected month-end spend based on burn rate — Phase 6
 - [ ] **GOAL-03**: Historical goal achievement shown as win/loss per month — Phase 6
 
 ### Insights & Patterns
