@@ -53,4 +53,13 @@ export const transactionsApi = {
   merchantBreakdown: (params) => api.get('/transactions/merchant-breakdown', { params }),
 }
 
+export const analyticsApi = {
+  trend: (params) => api.get('/analytics/trend', { params }),
+  getSpendingLimit: (granularity) =>
+    api.get('/analytics/spending-limit', { params: { granularity } }),
+  putSpendingLimit: (data) => api.put('/analytics/spending-limit', data),
+  deleteSpendingLimit: (granularity) =>
+    api.delete('/analytics/spending-limit', { params: { granularity } }),
+}
+
 export default api
