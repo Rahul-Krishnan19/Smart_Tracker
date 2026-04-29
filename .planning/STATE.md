@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: executing
-stopped_at: "Completed 06-02: SpendingLimit table, CRUD endpoints, 101 tests green"
-last_updated: "2026-04-29T07:13:04.747Z"
+stopped_at: "Checkpoint 06-03 Task 3: manual verification of trend chart, click-through, spending-limit flow"
+last_updated: "2026-04-29T14:40:40.165Z"
 progress:
   total_phases: 10
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 13
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -85,6 +85,9 @@ Phase 04 Plans 01 and 02 complete. Core automated sync is working end-to-end.
 - [Phase 06]: Decimal in SpendingLimitUpsert body, float in SpendingLimitOut response — Field(gt=0) validates positivity; float is JSON-safe
 - [Phase 06]: Upsert via get-then-update pattern (not ON CONFLICT) — SQLite-compatible and consistent with category_rule_service
 - [Phase 06]: Idempotent DELETE returns 204 unconditionally — service returns bool for testability but route ignores it
+- [Phase 06]: Burn-rate computed on frontend: backend trend response has current_total; frontend divides by days_elapsed and projects to period_end — keeps backend simple
+- [Phase 06]: analyticsApi as separate export namespace (not merged into transactionsApi): different route prefix /api/analytics
+- [Phase 06]: useSearchParams initial value in useState lazy initializer: reads params once at mount, stable reference for useCallback dependencies
 
 ## Known Blockers / Flags
 
@@ -131,7 +134,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 
 ## Last Session
 
-**Stopped at:** Completed 06-02: SpendingLimit table, CRUD endpoints, 101 tests green
+**Stopped at:** Checkpoint 06-03 Task 3: manual verification of trend chart, click-through, spending-limit flow
 **Timestamp:** 2026-04-28T21:51:25Z
 
 ---
