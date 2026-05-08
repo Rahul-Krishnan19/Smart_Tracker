@@ -23,7 +23,7 @@ class EmailSyncService:
         db: Session,
         user_id: int,
         encrypted_token: str,
-        max_emails: int = 50,
+        max_emails: int = 200,
     ) -> dict:
         """
         Fetch emails, parse, and store new transactions.
@@ -121,6 +121,16 @@ class EmailSyncService:
             meta.bank_name = parsed.bank_name
             summary["parsed_ok"] += 1
             db.commit()
+
+        # Phase 7 D-19: post-sync detection hook (insights/anomalies/subscriptions)
+        try:
+            from app.services import insights_orchestrator as _orch
+            insights_summary = _orch.run_post_sync(db, user_id)
+            summary["insights"] = insights_summary
+        except Exception as e:
+            # never break sync because of insights
+            import logging
+            logging.getLogger(__name__).error(f"post-sync insights hook failed: {e}")
 
         return summary
 
