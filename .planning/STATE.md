@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: executing
-stopped_at: Completed 07-01-PLAN.md
-last_updated: "2026-04-29T22:02:27.642Z"
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-05-08T08:00:00.000Z"
 progress:
   total_phases: 10
   completed_phases: 4
@@ -90,6 +90,8 @@ Phase 04 Plans 01 and 02 complete. Core automated sync is working end-to-end.
 - [Phase 06]: useSearchParams initial value in useState lazy initializer: reads params once at mount, stable reference for useCallback dependencies
 - [Phase 07]: transaction_id is nullable on Anomaly to support missing_subscription rule (no transaction to link)
 - [Phase 07]: ANOMALY_SEVERITY dict in insights_config.py centralizes rule-to-severity mapping for InsightService
+- [Phase 07-02]: InsightService uses today.date()+1day upper bound for this_month_total to include same-day transactions
+- [Phase 07-02]: insights_orchestrator imported as module in email_sync_service to allow test patching via attribute access
 
 ## Known Blockers / Flags
 
@@ -114,6 +116,7 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 | Phase 06 P01 | 4min | 3 tasks | 5 files |
 | Phase 06 P02 | 8min | 2 tasks | 8 files |
 | Phase 07 P01 | 10 | 3 tasks | 8 files |
+| Phase 07 P02 | 20min | 4 tasks | 12 files |
 
 ## Planning Artifacts
 
@@ -137,8 +140,8 @@ None currently. Gmail token refresh bug fixed in Phase 4 Plan 01.
 
 ## Last Session
 
-**Stopped at:** Completed 07-01-PLAN.md
-**Timestamp:** 2026-04-28T21:51:25Z
+**Stopped at:** Completed 07-02-PLAN.md
+**Timestamp:** 2026-05-08T08:00:00Z
 
 ---
 *State last updated: 2026-04-28 (Plan 05-03 Task 1 complete — AnalyticsPage enhancements done)*
