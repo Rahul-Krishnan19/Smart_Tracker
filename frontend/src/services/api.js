@@ -62,4 +62,14 @@ export const analyticsApi = {
     api.delete('/analytics/spending-limit', { params: { granularity } }),
 }
 
+export const insightsApi = {
+  getAnomalies: () => api.get('/insights/anomalies').then(r => r.data),
+  updateAnomaly: (id, status) => api.patch(`/insights/anomalies/${id}`, { status }).then(r => r.data),
+  getSubscriptions: () => api.get('/insights/subscriptions').then(r => r.data),
+  updateSubscription: (id, status) => api.patch(`/insights/subscriptions/${id}`, { status }).then(r => r.data),
+  getInsights: () => api.get('/insights/insights').then(r => r.data),
+  dismissInsight: (id) => api.post(`/insights/insights/${id}/dismiss`).then(r => r.data),
+  getSummary: () => api.get('/insights/summary').then(r => r.data),
+}
+
 export default api
