@@ -7,7 +7,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Literal, Optional
 
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.models.transaction import Transaction
@@ -94,6 +94,10 @@ class TrendService:
         date_from: Optional[date],
         date_to: Optional[date],
         payment_source: Optional[str],
+        category: Optional[str] = None,
+        min_amount: Optional[Decimal] = None,
+        max_amount: Optional[Decimal] = None,
+        search: Optional[str] = None,
     ) -> dict:
         """
         Aggregate transactions into time-series periods.
@@ -122,6 +126,21 @@ class TrendService:
             base = base.filter(Transaction.transaction_date <= date_to)
         if payment_source:
             base = base.filter(Transaction.payment_source == payment_source)
+        if category:
+            base = base.filter(Transaction.category == category)
+        if min_amount is not None:
+            base = base.filter(Transaction.amount >= min_amount)
+        if max_amount is not None:
+            base = base.filter(Transaction.amount <= max_amount)
+        if search:
+            term = f"%{search}%"
+            base = base.filter(
+                or_(
+                    Transaction.description.ilike(term),
+                    Transaction.merchant.ilike(term),
+                    Transaction.notes.ilike(term),
+                )
+            )
 
         # ------------------------------------------------------------------
         # Main aggregation query — one row per period
@@ -215,6 +234,21 @@ class TrendService:
             if payment_source:
                 prev_query = prev_query.filter(
                     Transaction.payment_source == payment_source
+                )
+            if category:
+                prev_query = prev_query.filter(Transaction.category == category)
+            if min_amount is not None:
+                prev_query = prev_query.filter(Transaction.amount >= min_amount)
+            if max_amount is not None:
+                prev_query = prev_query.filter(Transaction.amount <= max_amount)
+            if search:
+                term = f"%{search}%"
+                prev_query = prev_query.filter(
+                    or_(
+                        Transaction.description.ilike(term),
+                        Transaction.merchant.ilike(term),
+                        Transaction.notes.ilike(term),
+                    )
                 )
 
             prev_sum = prev_query.with_entities(

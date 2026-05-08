@@ -4,6 +4,7 @@ Phase 6, Plan 01 — ANA-03, ANA-04, ANA-05, ANA-06
 Phase 6, Plan 02 — GOAL-02 (spending limit CRUD)
 """
 from datetime import date
+from decimal import Decimal
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, HTTPException
@@ -30,6 +31,10 @@ def get_trend(
     date_from: Optional[date] = Query(None),
     date_to: Optional[date] = Query(None),
     payment_source: Optional[str] = Query(None),
+    category: Optional[str] = Query(None),
+    min_amount: Optional[Decimal] = Query(None, ge=0),
+    max_amount: Optional[Decimal] = Query(None, ge=0),
+    search: Optional[str] = Query(None, max_length=100),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -62,6 +67,10 @@ def get_trend(
         date_from=date_from,
         date_to=date_to,
         payment_source=payment_source,
+        category=category,
+        min_amount=min_amount,
+        max_amount=max_amount,
+        search=search,
     )
 
 

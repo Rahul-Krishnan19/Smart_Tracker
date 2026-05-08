@@ -146,6 +146,7 @@ def get_merchant_breakdown(
     payment_source: Optional[str] = Query(None),
     min_amount: Optional[Decimal] = Query(None, ge=0),
     max_amount: Optional[Decimal] = Query(None, ge=0),
+    search: Optional[str] = Query(None, max_length=100),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -158,6 +159,7 @@ def get_merchant_breakdown(
         payment_source=payment_source,
         min_amount=min_amount,
         max_amount=max_amount,
+        search=search,
     )
     return transaction_service.get_merchant_breakdown(db, current_user.id, filters)
 

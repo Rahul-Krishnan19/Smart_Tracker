@@ -6,6 +6,7 @@ import {
 } from 'recharts'
 import TrendChart from '../components/analytics/TrendChart'
 import GranularityToggle from '../components/analytics/GranularityToggle'
+import FilterPanel from '../components/transactions/FilterPanel'
 import { useFilters } from '../context/FiltersContext'
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#94a3b8']
@@ -33,7 +34,6 @@ export default function AnalyticsPage() {
   const [pctChange, setPctChange] = useState(null)
   const [previousTotal, setPreviousTotal] = useState(0)
   const [categoryOverlay, setCategoryOverlay] = useState(false)
-  const [paymentSources, setPaymentSources] = useState([])
 
   async function fetchSummary(filters = analyticsFilters) {
     setLoading(true)
@@ -76,13 +76,6 @@ export default function AnalyticsPage() {
     fetchTrend(granularity, newFilters)
   }
 
-  // Fetch payment sources on mount (used by the Payment Source dropdown)
-  useEffect(() => {
-    transactionsApi.paymentSources()
-      .then(res => setPaymentSources(res.data.payment_sources))
-      .catch(() => {})
-  }, [])
-
   useEffect(() => {
     fetchSummary()
     fetchMerchantBreakdown()
@@ -97,43 +90,9 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Date Range Picker + Payment Source Filter */}
-      <div className="card">
-        <div className="flex flex-wrap items-end gap-4">
-          <div>
-            <label className="label">From</label>
-            <input
-              type="date"
-              value={analyticsFilters.date_from}
-              onChange={e => setAnalyticsFilters({ ...analyticsFilters, date_from: e.target.value })}
-              className="input-field"
-            />
-          </div>
-          <div>
-            <label className="label">To</label>
-            <input
-              type="date"
-              value={analyticsFilters.date_to}
-              onChange={e => setAnalyticsFilters({ ...analyticsFilters, date_to: e.target.value })}
-              className="input-field"
-            />
-          </div>
-          <div>
-            <label className="label">Payment Source</label>
-            <select
-              value={analyticsFilters.payment_source}
-              onChange={e => setAnalyticsFilters({ ...analyticsFilters, payment_source: e.target.value })}
-              className="input-field"
-            >
-              <option value="">All sources</option>
-              {paymentSources.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </div>
-          <button onClick={() => handleApply(analyticsFilters)} disabled={loading} className="btn-primary">
-            {loading ? 'Loading…' : 'Apply'}
-          </button>
-        </div>
-      </div>
+      {/* Full filter panel — same component used on the Transactions page.
+          Filter state lives in FiltersContext so it persists across tab switches. */}
+      <FilterPanel onFilter={handleApply} loading={loading} defaultValues={analyticsFilters} />
 
       {/* Trend section (Phase 6) */}
       <div className="card">
