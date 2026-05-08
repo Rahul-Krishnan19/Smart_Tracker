@@ -38,7 +38,7 @@ export default function TransactionList({ transactions, onRefresh, loading, onBu
   const [editLoading, setEditLoading] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const [selectedIds, setSelectedIds] = useState(new Set())
-  const [categoryEdit, setCategoryEdit] = useState(null) // { txId, value, applyToMerchant }
+  const [categoryEdit, setCategoryEdit] = useState(null) // { txId, value }
   const [categoryEditLoading, setCategoryEditLoading] = useState(false)
   const [bulkCategory, setBulkCategory] = useState('')
 
@@ -61,7 +61,6 @@ export default function TransactionList({ transactions, onRefresh, loading, onBu
     try {
       await transactionsApi.updateCategory(tx.id, {
         category: categoryEdit.value,
-        apply_to_merchant: categoryEdit.applyToMerchant,
       })
       setCategoryEdit(null)
       onRefresh()
@@ -236,17 +235,6 @@ export default function TransactionList({ transactions, onRefresh, loading, onBu
                       >
                         {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
-                      {tx.merchant && (
-                        <label className="flex items-center gap-1 text-xs text-gray-500">
-                          <input
-                            type="checkbox"
-                            checked={categoryEdit.applyToMerchant}
-                            onChange={e => setCategoryEdit({ ...categoryEdit, applyToMerchant: e.target.checked })}
-                            className="rounded border-gray-300"
-                          />
-                          Apply to all from {tx.merchant}
-                        </label>
-                      )}
                       <div className="flex gap-1">
                         <button onClick={() => saveCategoryEdit(tx)} disabled={categoryEditLoading} className="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Save</button>
                         <button onClick={() => setCategoryEdit(null)} className="text-xs text-gray-500 hover:text-gray-700">Cancel</button>
@@ -255,7 +243,7 @@ export default function TransactionList({ transactions, onRefresh, loading, onBu
                   ) : (
                     <span
                       className={`badge cursor-pointer ${CATEGORY_COLORS[tx.category] ?? 'bg-gray-100 text-gray-800'}`}
-                      onClick={() => setCategoryEdit({ txId: tx.id, value: tx.category, applyToMerchant: false })}
+                      onClick={() => setCategoryEdit({ txId: tx.id, value: tx.category })}
                       title="Click to re-categorize"
                     >
                       {tx.category}

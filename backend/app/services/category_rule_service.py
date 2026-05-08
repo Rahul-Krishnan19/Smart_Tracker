@@ -76,3 +76,30 @@ def upsert_rule_and_bulk_update(
 
     db.commit()
     return updated
+
+
+def upsert_rule_if_absent(
+    db: Session,
+    user_id: int,
+    merchant: str,
+    category: str,
+) -> None:
+    """
+    Create a CategoryRule for merchant→category only if none exists yet.
+    Called at import time — does NOT bulk-update existing transactions.
+    """
+    if not merchant:
+        return
+    existing = db.query(CategoryRule).filter(
+        CategoryRule.user_id == user_id,
+        CategoryRule.keyword == merchant.lower(),
+        CategoryRule.match_type == "contains",
+    ).first()
+    if not existing:
+        db.add(CategoryRule(
+            user_id=user_id,
+            keyword=merchant.lower(),
+            match_type="contains",
+            category=category,
+        ))
+        db.commit()

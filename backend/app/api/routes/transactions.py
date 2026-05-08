@@ -273,10 +273,15 @@ def update_transaction_category(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """TXN-11: Inline category re-assign. If apply_to_merchant, creates rule and bulk updates."""
+    """TXN-11: Inline category re-assign.
+
+    Whenever the transaction has a merchant, we ALWAYS persist a merchant→category
+    rule (via upsert_rule_and_bulk_update) so future imports respect the user's
+    correction and existing transactions from that merchant are bulk-updated.
+    """
     tx = transaction_service.get(db, current_user.id, tx_id)
     tx.category = data.category
-    if data.apply_to_merchant and tx.merchant:
+    if tx.merchant:
         upsert_rule_and_bulk_update(db, current_user.id, tx.merchant, data.category)
     else:
         db.commit()

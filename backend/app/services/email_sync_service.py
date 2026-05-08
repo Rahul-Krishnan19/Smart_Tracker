@@ -13,7 +13,7 @@ from app.models.email_metadata import EmailMetadata
 from app.models.transaction import Transaction
 from app.services.gmail_service import gmail_service
 from app.parsers.parser_factory import get_parser, parse_email
-from app.services.category_rule_service import apply_user_rules
+from app.services.category_rule_service import apply_user_rules, upsert_rule_if_absent
 
 
 class EmailSyncService:
@@ -116,6 +116,11 @@ class EmailSyncService:
                 )
                 db.add(tx)
                 summary["transactions_created"] += 1
+
+                # Auto-persist merchant→category rule so future imports stay
+                # categorised even if the parser's heuristic changes.
+                if parsed.merchant:
+                    upsert_rule_if_absent(db, user_id, parsed.merchant, parsed.category)
 
             meta.parse_status = "success"
             meta.bank_name = parsed.bank_name
