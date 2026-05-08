@@ -14,7 +14,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
-from app.api.routes import auth, transactions, gmail, analytics
+from app.api.routes import auth, transactions, gmail, analytics, insights
 from app.scheduler import scheduler, register_startup_jobs
 
 
@@ -78,6 +78,7 @@ app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(transactions.router, prefix="/api/transactions", tags=["transactions"])
 app.include_router(gmail.router, prefix="/api/gmail", tags=["gmail"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
+app.include_router(insights.router)
 
 
 @app.get("/api/health", tags=["health"])
