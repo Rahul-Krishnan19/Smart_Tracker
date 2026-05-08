@@ -5,6 +5,7 @@ import TransactionList from '../components/transactions/TransactionList'
 import TransactionForm from '../components/transactions/TransactionForm'
 import FilterPanel from '../components/transactions/FilterPanel'
 import GmailSync from '../components/gmail/GmailSync'
+import { useFilters } from '../context/FiltersContext'
 
 function formatAmount(amount) {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount)
@@ -12,16 +13,8 @@ function formatAmount(amount) {
 
 export default function TransactionsPage() {
   const [searchParams] = useSearchParams()
-  const [initialFilters] = useState(() => {
-    const init = {}
-    const df = searchParams.get('date_from')
-    const dt = searchParams.get('date_to')
-    if (df) init.date_from = df
-    if (dt) init.date_to = dt
-    return init
-  })
+  const { txFilters, setTxFilters } = useFilters()
   const [data, setData] = useState({ items: [], total: 0, page: 1, page_size: 50, total_pages: 1 })
-  const [filters, setFilters] = useState(initialFilters)
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const [addLoading, setAddLoading] = useState(false)
@@ -30,7 +23,7 @@ export default function TransactionsPage() {
   const [success, setSuccess] = useState('')
   const [summary, setSummary] = useState(null)
 
-  const fetchTransactions = useCallback(async (appliedFilters = filters, p = page) => {
+  const fetchTransactions = useCallback(async (appliedFilters = txFilters, p = page) => {
     setLoading(true)
     setError('')
     try {
@@ -41,24 +34,39 @@ export default function TransactionsPage() {
     } finally {
       setLoading(false)
     }
-  }, [filters, page])
+  }, [txFilters, page])
 
-  const fetchSummary = useCallback(async (appliedFilters = filters) => {
+  const fetchSummary = useCallback(async (appliedFilters = txFilters) => {
     try {
       const res = await transactionsApi.summary(appliedFilters)
       setSummary(res.data)
     } catch {
       // Non-critical
     }
-  }, [filters])
+  }, [txFilters])
+
+  // Apply URL params (e.g. from drill-down links) once on mount.
+  useEffect(() => {
+    const df = searchParams.get('date_from')
+    const dt = searchParams.get('date_to')
+    if (df || dt) {
+      setTxFilters(prev => ({
+        ...prev,
+        ...(df ? { date_from: df } : {}),
+        ...(dt ? { date_to: dt } : {}),
+      }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     fetchTransactions()
     fetchSummary()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function handleFilter(newFilters) {
-    setFilters(newFilters)
+    setTxFilters(newFilters)
     setPage(1)
     fetchTransactions(newFilters, 1)
     fetchSummary(newFilters)
@@ -84,7 +92,7 @@ export default function TransactionsPage() {
 
   async function handleExport() {
     try {
-      const res = await transactionsApi.export(filters)
+      const res = await transactionsApi.export(txFilters)
       const url = URL.createObjectURL(new Blob([res.data], { type: 'text/csv' }))
       const a = document.createElement('a')
       a.href = url
@@ -100,7 +108,7 @@ export default function TransactionsPage() {
 
   function handlePageChange(newPage) {
     setPage(newPage)
-    fetchTransactions(filters, newPage)
+    fetchTransactions(txFilters, newPage)
   }
 
   return (
@@ -131,7 +139,7 @@ export default function TransactionsPage() {
       </div>
 
       {/* Filters */}
-      <FilterPanel onFilter={handleFilter} loading={loading} defaultValues={initialFilters} />
+      <FilterPanel onFilter={handleFilter} loading={loading} defaultValues={txFilters} />
 
       {/* Alerts */}
       {error && (

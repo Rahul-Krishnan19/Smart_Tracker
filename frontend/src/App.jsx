@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { FiltersProvider } from './context/FiltersContext'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import LoginForm from './components/auth/LoginForm'
 import TransactionsPage from './pages/TransactionsPage'
@@ -98,9 +99,11 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
+      <FiltersProvider>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </FiltersProvider>
     </BrowserRouter>
   )
 }

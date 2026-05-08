@@ -4,9 +4,9 @@ import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from 'recharts'
-import { format, startOfMonth, endOfMonth } from 'date-fns'
 import TrendChart from '../components/analytics/TrendChart'
 import GranularityToggle from '../components/analytics/GranularityToggle'
+import { useFilters } from '../context/FiltersContext'
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#94a3b8']
 
@@ -14,33 +14,31 @@ function formatINR(v) {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v)
 }
 
+// Build a clean params object for API calls — only include non-empty values.
+function buildParams(filters, extras = {}) {
+  const params = { ...extras }
+  for (const [k, v] of Object.entries(filters)) {
+    if (v !== '' && v !== null && v !== undefined) params[k] = v
+  }
+  return params
+}
+
 export default function AnalyticsPage() {
+  const { analyticsFilters, setAnalyticsFilters } = useFilters()
   const [summary, setSummary] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [dateFrom, setDateFrom] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'))
-  const [dateTo, setDateTo] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'))
-  const [paymentSource, setPaymentSource] = useState('')
-  const [paymentSources, setPaymentSources] = useState([])
   const [merchantData, setMerchantData] = useState(null)
   const [granularity, setGranularity] = useState('monthly')
   const [trendData, setTrendData] = useState(null)
   const [pctChange, setPctChange] = useState(null)
   const [previousTotal, setPreviousTotal] = useState(0)
   const [categoryOverlay, setCategoryOverlay] = useState(false)
+  const [paymentSources, setPaymentSources] = useState([])
 
-  // Fetch payment sources on mount
-  useEffect(() => {
-    transactionsApi.paymentSources()
-      .then(res => setPaymentSources(res.data.payment_sources))
-      .catch(() => {})
-  }, [])
-
-  async function fetchSummary() {
+  async function fetchSummary(filters = analyticsFilters) {
     setLoading(true)
     try {
-      const params = { date_from: dateFrom, date_to: dateTo }
-      if (paymentSource) params.payment_source = paymentSource
-      const res = await transactionsApi.summary(params)
+      const res = await transactionsApi.summary(buildParams(filters))
       setSummary(res.data)
     } catch {
       // ignore
@@ -49,22 +47,18 @@ export default function AnalyticsPage() {
     }
   }
 
-  async function fetchMerchantBreakdown() {
+  async function fetchMerchantBreakdown(filters = analyticsFilters) {
     try {
-      const params = { date_from: dateFrom, date_to: dateTo }
-      if (paymentSource) params.payment_source = paymentSource
-      const res = await transactionsApi.merchantBreakdown(params)
+      const res = await transactionsApi.merchantBreakdown(buildParams(filters))
       setMerchantData(res.data)
     } catch {
       // ignore
     }
   }
 
-  async function fetchTrend(currentGranularity = granularity) {
+  async function fetchTrend(currentGranularity = granularity, filters = analyticsFilters) {
     try {
-      const params = { granularity: currentGranularity, date_from: dateFrom, date_to: dateTo }
-      if (paymentSource) params.payment_source = paymentSource
-      const res = await analyticsApi.trend(params)
+      const res = await analyticsApi.trend(buildParams(filters, { granularity: currentGranularity }))
       setTrendData(res.data.trend)
       setPctChange(res.data.pct_change)
       setPreviousTotal(res.data.previous_total)
@@ -75,20 +69,30 @@ export default function AnalyticsPage() {
     }
   }
 
-  function handleApply() {
-    fetchSummary()
-    fetchMerchantBreakdown()
-    fetchTrend()
+  function handleApply(newFilters) {
+    setAnalyticsFilters(newFilters)
+    fetchSummary(newFilters)
+    fetchMerchantBreakdown(newFilters)
+    fetchTrend(granularity, newFilters)
   }
+
+  // Fetch payment sources on mount (used by the Payment Source dropdown)
+  useEffect(() => {
+    transactionsApi.paymentSources()
+      .then(res => setPaymentSources(res.data.payment_sources))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     fetchSummary()
     fetchMerchantBreakdown()
     fetchTrend()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     fetchTrend(granularity)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [granularity])
 
   return (
@@ -98,24 +102,34 @@ export default function AnalyticsPage() {
         <div className="flex flex-wrap items-end gap-4">
           <div>
             <label className="label">From</label>
-            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="input-field" />
+            <input
+              type="date"
+              value={analyticsFilters.date_from}
+              onChange={e => setAnalyticsFilters({ ...analyticsFilters, date_from: e.target.value })}
+              className="input-field"
+            />
           </div>
           <div>
             <label className="label">To</label>
-            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="input-field" />
+            <input
+              type="date"
+              value={analyticsFilters.date_to}
+              onChange={e => setAnalyticsFilters({ ...analyticsFilters, date_to: e.target.value })}
+              className="input-field"
+            />
           </div>
           <div>
             <label className="label">Payment Source</label>
             <select
-              value={paymentSource}
-              onChange={e => setPaymentSource(e.target.value)}
+              value={analyticsFilters.payment_source}
+              onChange={e => setAnalyticsFilters({ ...analyticsFilters, payment_source: e.target.value })}
               className="input-field"
             >
               <option value="">All sources</option>
               {paymentSources.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
-          <button onClick={handleApply} disabled={loading} className="btn-primary">
+          <button onClick={() => handleApply(analyticsFilters)} disabled={loading} className="btn-primary">
             {loading ? 'Loading…' : 'Apply'}
           </button>
         </div>
