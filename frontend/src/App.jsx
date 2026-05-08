@@ -6,7 +6,6 @@ import TransactionsPage from './pages/TransactionsPage'
 import AnalyticsPage from './pages/AnalyticsPage'
 import GmailCallbackPage from './pages/GmailCallbackPage'
 import InsightsPage from './pages/InsightsPage'
-import InsightsBadge from './components/insights/InsightsBadge'
 
 function Layout({ children }) {
   const { user, logout } = useAuth()
@@ -33,7 +32,6 @@ function Layout({ children }) {
               </NavLink>
               <NavLink to="/insights" className={navLinkClass}>
                 Insights
-                <InsightsBadge />
               </NavLink>
             </nav>
           </div>
