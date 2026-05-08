@@ -1,8 +1,8 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
-from app.models.transaction import CATEGORIES, PAYMENT_METHODS
+from app.models.transaction import PAYMENT_METHODS
 
 
 class TransactionCreate(BaseModel):
@@ -10,7 +10,7 @@ class TransactionCreate(BaseModel):
     amount: Decimal
     description: str
     merchant: Optional[str] = None
-    category: str = "Others"
+    category: str = Field("Others", min_length=1, max_length=100)
     payment_method: str = "Others"
     notes: Optional[str] = None
 
@@ -33,9 +33,10 @@ class TransactionCreate(BaseModel):
 
     @field_validator("category")
     @classmethod
-    def category_valid(cls, v: str) -> str:
-        if v not in CATEGORIES:
-            raise ValueError(f"Category must be one of: {', '.join(CATEGORIES)}")
+    def category_not_empty(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Category cannot be empty")
         return v
 
     @field_validator("payment_method")
@@ -64,9 +65,14 @@ class TransactionUpdate(BaseModel):
 
     @field_validator("category")
     @classmethod
-    def category_valid(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None and v not in CATEGORIES:
-            raise ValueError(f"Category must be one of: {', '.join(CATEGORIES)}")
+    def category_not_empty_opt(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        v = v.strip()
+        if not v:
+            raise ValueError("Category cannot be empty")
+        if len(v) > 100:
+            raise ValueError("Category must be 100 characters or less")
         return v
 
     @field_validator("payment_method")
@@ -131,24 +137,25 @@ class TransactionFilters(BaseModel):
 
 
 class TransactionCategoryUpdate(BaseModel):
-    category: str
-    apply_to_merchant: bool = False
+    category: str = Field(..., min_length=1, max_length=100)
 
     @field_validator("category")
     @classmethod
-    def category_valid(cls, v: str) -> str:
-        if v not in CATEGORIES:
-            raise ValueError(f"Category must be one of: {', '.join(CATEGORIES)}")
+    def category_not_empty(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Category cannot be empty")
         return v
 
 
 class BulkCategorizeRequest(BaseModel):
     transaction_ids: list[int]
-    category: str
+    category: str = Field(..., min_length=1, max_length=100)
 
     @field_validator("category")
     @classmethod
-    def category_valid(cls, v: str) -> str:
-        if v not in CATEGORIES:
-            raise ValueError(f"Category must be one of: {', '.join(CATEGORIES)}")
+    def category_not_empty(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Category cannot be empty")
         return v

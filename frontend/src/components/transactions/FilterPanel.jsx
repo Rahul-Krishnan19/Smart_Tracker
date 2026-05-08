@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths, startOfYear, format } from 'date-fns'
 import { transactionsApi } from '../../services/api'
 
-const CATEGORIES = ['Rent', 'Groceries', 'Shopping', 'Electricity', 'Food & Dining', 'Transport', 'Entertainment', 'Healthcare', 'Subscriptions', 'Utilities', 'Travel', 'Others']
+const DEFAULT_CATEGORIES = ['Rent', 'Groceries', 'Shopping', 'Electricity', 'Food & Dining', 'Transport', 'Entertainment', 'Healthcare', 'Subscriptions', 'Utilities', 'Travel', 'Others']
 const PAYMENT_METHODS = ['Credit Card', 'UPI', 'Cash', 'Debit Card', 'Net Banking', 'Others']
 
 const DATE_PRESETS = [
@@ -18,11 +18,13 @@ const DATE_PRESETS = [
 export default function FilterPanel({ onFilter, loading, defaultValues = {} }) {
   const { register, handleSubmit, reset, setValue } = useForm({ defaultValues })
   const [paymentSources, setPaymentSources] = useState([])
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
   const [merchantSuggestions, setMerchantSuggestions] = useState([])
   const debounceRef = useRef(null)
 
   useEffect(() => {
     transactionsApi.paymentSources().then(res => setPaymentSources(res.data.payment_sources)).catch(() => {})
+    transactionsApi.categories().then(res => setCategories(res.data.categories)).catch(() => {})
   }, [])
 
   function handleSearchChange(e) {
@@ -71,7 +73,7 @@ export default function FilterPanel({ onFilter, loading, defaultValues = {} }) {
           <label className="label">Category</label>
           <select {...register('category')} className="input-field">
             <option value="">All categories</option>
-            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            {categories.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div>

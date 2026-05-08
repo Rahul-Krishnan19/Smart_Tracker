@@ -228,6 +228,21 @@ def bulk_categorize(
     return {"updated": updated}
 
 
+@router.get("/categories")
+def list_categories(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return system categories + any custom categories the user has used."""
+    from app.models.transaction import CATEGORIES
+    custom = db.query(Transaction.category).filter(
+        Transaction.user_id == current_user.id,
+        Transaction.category.notin_(CATEGORIES),
+    ).distinct().all()
+    custom_list = [r[0] for r in custom if r[0]]
+    return {"categories": CATEGORIES + sorted(custom_list)}
+
+
 # ---------------------------------------------------------------------------
 # Per-transaction routes (/{tx_id} — must stay after all static routes)
 # ---------------------------------------------------------------------------

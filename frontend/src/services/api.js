@@ -51,6 +51,7 @@ export const transactionsApi = {
   bulkCategorize: (data) => api.post('/transactions/bulk-categorize', data),
   updateCategory: (id, data) => api.put(`/transactions/${id}/category`, data),
   merchantBreakdown: (params) => api.get('/transactions/merchant-breakdown', { params }),
+  categories: () => api.get('/transactions/categories'),
 }
 
 export const analyticsApi = {
