@@ -244,18 +244,28 @@ class TestSchemaExtensions:
         assert "max_amount" in fields
 
     def test_transaction_category_update_exists(self):
-        """TransactionCategoryUpdate schema exists with correct fields."""
+        """TransactionCategoryUpdate schema exists with correct fields.
+
+        Note: `apply_to_merchant` was removed — rules are now ALWAYS persisted
+        whenever the transaction has a merchant.
+        """
         from app.schemas.transaction import TransactionCategoryUpdate
         fields = TransactionCategoryUpdate.model_fields
         assert "category" in fields
-        assert "apply_to_merchant" in fields
+        assert "apply_to_merchant" not in fields
 
-    def test_transaction_category_update_validates_category(self):
-        """TransactionCategoryUpdate rejects invalid categories."""
+    def test_transaction_category_update_rejects_empty_category(self):
+        """TransactionCategoryUpdate rejects empty/whitespace categories.
+
+        Custom categories are allowed (any non-empty string up to 100 chars),
+        so we no longer reject names that aren't in the predefined CATEGORIES list.
+        """
         from app.schemas.transaction import TransactionCategoryUpdate
         import pydantic
         with pytest.raises(pydantic.ValidationError):
-            TransactionCategoryUpdate(category="InvalidCategory")
+            TransactionCategoryUpdate(category="")
+        with pytest.raises(pydantic.ValidationError):
+            TransactionCategoryUpdate(category="   ")
 
     def test_transaction_category_update_accepts_valid_category(self):
         """TransactionCategoryUpdate accepts valid categories including new ones."""
@@ -274,9 +284,13 @@ class TestSchemaExtensions:
         assert "transaction_ids" in fields
         assert "category" in fields
 
-    def test_bulk_categorize_request_validates_category(self):
-        """BulkCategorizeRequest rejects invalid categories."""
+    def test_bulk_categorize_request_rejects_empty_category(self):
+        """BulkCategorizeRequest rejects empty categories.
+
+        Custom categories are allowed (any non-empty string), so the schema
+        only enforces non-emptiness rather than membership in CATEGORIES.
+        """
         from app.schemas.transaction import BulkCategorizeRequest
         import pydantic
         with pytest.raises(pydantic.ValidationError):
-            BulkCategorizeRequest(transaction_ids=[1, 2], category="NotACategory")
+            BulkCategorizeRequest(transaction_ids=[1, 2], category="")
