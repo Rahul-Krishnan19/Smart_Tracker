@@ -6,7 +6,6 @@ import {
 } from 'recharts'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
 import TrendChart from '../components/analytics/TrendChart'
-import BurnRateCard from '../components/analytics/BurnRateCard'
 import GranularityToggle from '../components/analytics/GranularityToggle'
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#94a3b8']
@@ -150,19 +149,7 @@ export default function AnalyticsPage() {
             <GranularityToggle value={granularity} onChange={setGranularity} />
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2">
-            <TrendChart data={trendData ?? []} categoryOverlay={categoryOverlay} />
-          </div>
-          <div>
-            <BurnRateCard
-              granularity={granularity}
-              dateFrom={dateFrom}
-              dateTo={dateTo}
-              currentTotal={summary?.total_amount ?? 0}
-            />
-          </div>
-        </div>
+        <TrendChart data={trendData ?? []} categoryOverlay={categoryOverlay} />
       </div>
 
       {summary && (
