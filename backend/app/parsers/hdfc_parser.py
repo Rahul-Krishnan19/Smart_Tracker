@@ -70,7 +70,7 @@ class HDFCParser(BaseEmailParser):
 
     @property
     def sender_patterns(self) -> list[str]:
-        return ["hdfcbank.com", "hdfc.com", "hdfc.bank.in", "hdfcbank.bank.in"]
+        return ["hdfcbank.com", "hdfc.com", "hdfc.bank.in", "hdfcbank.bank.in", "hdfcbank.net"]
 
     @property
     def subject_patterns(self) -> list[str]:
@@ -104,6 +104,10 @@ class HDFCParser(BaseEmailParser):
     #  Your UPI transaction reference number is 608664581748."
     # ------------------------------------------------------------------
     def _parse_upi_debit(self, body: str, fallback_date: date) -> Optional[ParsedTransaction]:
+        # If this is a credit card email that happens to use "has been debited", skip it
+        if re.search(r'credit card', body, re.IGNORECASE):
+            return None
+
         amount_m = re.search(
             r'Rs\.?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s+has been debited',
             body, re.IGNORECASE
@@ -171,7 +175,7 @@ class HDFCParser(BaseEmailParser):
     # ------------------------------------------------------------------
     def _parse_credit_card_debit(self, body: str, fallback_date: date) -> Optional[ParsedTransaction]:
         amount_m = re.search(
-            r'Rs\.?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s+is debited from your HDFC Bank Credit Card',
+            r'Rs\.?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s+(?:is|has been) debited from your HDFC Bank Credit Card',
             body, re.IGNORECASE
         )
         if not amount_m:

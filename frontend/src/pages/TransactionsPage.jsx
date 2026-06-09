@@ -7,6 +7,13 @@ import FilterPanel from '../components/transactions/FilterPanel'
 import GmailSync from '../components/gmail/GmailSync'
 import { useFilters } from '../context/FiltersContext'
 
+const CATEGORY_COLORS = {
+  'Food & Dining': '#f97316', 'Transport': '#0ea5e9', 'Groceries': '#10b981',
+  'Shopping': '#8b5cf6', 'Entertainment': '#ec4899', 'Healthcare': '#f43f5e',
+  'Subscriptions': '#6366f1', 'Utilities': '#f59e0b', 'Rent': '#14b8a6',
+  'Travel': '#06b6d4', 'Others': '#94a3b8',
+}
+
 function formatAmount(amount) {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount)
 }
@@ -113,21 +120,29 @@ export default function TransactionsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Page header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Syne, sans-serif' }}>Transactions</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Your complete spending log</p>
+        </div>
+      </div>
+
       {/* Summary Cards */}
       {summary && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="card text-center">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Spent</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{formatAmount(summary.total_amount)}</p>
+          <div className="card border-l-4 border-l-emerald-500">
+            <p className="section-label text-slate-400 mb-2">Total Spent</p>
+            <p className="stat-number text-xl">{formatAmount(summary.total_amount)}</p>
           </div>
-          <div className="card text-center">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Transactions</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{summary.transaction_count}</p>
+          <div className="card border-l-4 border-l-sky-400">
+            <p className="section-label text-slate-400 mb-2">Transactions</p>
+            <p className="stat-number text-xl">{summary.transaction_count}</p>
           </div>
           {summary.category_breakdown.slice(0, 2).map((c) => (
-            <div key={c.category} className="card text-center">
-              <p className="text-xs text-gray-500 uppercase tracking-wider">{c.category}</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{formatAmount(c.total)}</p>
+            <div key={c.category} className="card border-l-4" style={{ borderLeftColor: CATEGORY_COLORS[c.category] || '#94a3b8' }}>
+              <p className="section-label text-slate-400 mb-2 truncate">{c.category}</p>
+              <p className="stat-number text-xl">{formatAmount(c.total)}</p>
             </div>
           ))}
         </div>
@@ -143,46 +158,44 @@ export default function TransactionsPage() {
 
       {/* Alerts */}
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
+        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+          <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+          {error}
+        </div>
       )}
       {success && (
-        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">{success}</div>
+        <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
+          <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+          {success}
+        </div>
       )}
 
       {/* Transaction log */}
       <div className="card p-0 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <div>
-            <h2 className="text-base font-semibold text-gray-900">Transactions</h2>
-            <p className="text-xs text-gray-500">
+            <h2 className="text-base font-bold text-slate-900" style={{ fontFamily: 'Syne, sans-serif' }}>All Transactions</h2>
+            <p className="text-xs text-slate-500 mt-0.5">
               {summary
                 ? `${summary.transaction_count} transactions · ${formatAmount(summary.total_amount)}`
                 : `${data.total} total`}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleExport}
-              className="btn-secondary flex items-center gap-2 text-sm py-1.5 px-4"
-              title="Export filtered transactions as CSV"
-            >
+            <button onClick={handleExport} className="btn-secondary flex items-center gap-1.5" title="Export filtered transactions as CSV">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
               Export CSV
             </button>
-            <button
-              onClick={() => setShowForm((s) => !s)}
-              className="btn-primary flex items-center gap-2 text-sm py-1.5 px-4"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              {showForm ? 'Cancel' : 'Add Transaction'}
+            <button onClick={() => setShowForm((s) => !s)} className="btn-primary flex items-center gap-1.5">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+              {showForm ? 'Cancel' : 'Add'}
             </button>
           </div>
         </div>
 
         {showForm && (
-          <div className="px-6 py-4 bg-indigo-50 border-b border-indigo-100">
-            <h3 className="text-sm font-semibold text-indigo-900 mb-4">New Transaction</h3>
+          <div className="px-6 py-5 bg-emerald-50/50 border-b border-emerald-100">
+            <h3 className="text-sm font-bold text-slate-900 mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>New Transaction</h3>
             <TransactionForm onSubmit={handleAddTransaction} loading={addLoading} />
           </div>
         )}
@@ -195,25 +208,11 @@ export default function TransactionsPage() {
 
         {/* Pagination */}
         {data.total_pages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
-            <p className="text-sm text-gray-500">
-              Page {data.page} of {data.total_pages}
-            </p>
+          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
+            <p className="text-sm text-slate-500">Page {data.page} of {data.total_pages}</p>
             <div className="flex gap-2">
-              <button
-                onClick={() => handlePageChange(data.page - 1)}
-                disabled={data.page <= 1 || loading}
-                className="btn-secondary text-sm py-1.5 px-3 disabled:opacity-40"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => handlePageChange(data.page + 1)}
-                disabled={data.page >= data.total_pages || loading}
-                className="btn-secondary text-sm py-1.5 px-3 disabled:opacity-40"
-              >
-                Next
-              </button>
+              <button onClick={() => handlePageChange(data.page - 1)} disabled={data.page <= 1 || loading} className="btn-secondary text-sm py-1.5 px-3 disabled:opacity-40">← Prev</button>
+              <button onClick={() => handlePageChange(data.page + 1)} disabled={data.page >= data.total_pages || loading} className="btn-secondary text-sm py-1.5 px-3 disabled:opacity-40">Next →</button>
             </div>
           </div>
         )}

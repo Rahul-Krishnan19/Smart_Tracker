@@ -26,11 +26,14 @@ export default function InsightsPage() {
 
   useEffect(() => { refresh() }, [refresh])
 
-  if (loading) return <div className="text-gray-500">Loading insights...</div>
+  if (loading) return <div className="text-slate-500">Loading insights...</div>
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Insights</h1>
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Syne, sans-serif' }}>Insights</h1>
+        <p className="text-sm text-slate-500 mt-0.5">Patterns, anomalies, and spending intelligence</p>
+      </div>
       <SubscriptionsSection data={subs} onUpdate={refresh} />
       <InsightsFeedSection insights={insights} onUpdate={refresh} />
     </div>

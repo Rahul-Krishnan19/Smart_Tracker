@@ -8,7 +8,6 @@ from datetime import datetime, timezone
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-from apscheduler.triggers.cron import CronTrigger
 
 from app.database import SessionLocal
 from app.models.user import User
@@ -100,11 +99,4 @@ def register_startup_jobs() -> None:
             register_sync_job(user.id, user.sync_interval_hours)
         logger.info(f"Registered sync jobs for {len(users)} user(s) on startup")
 
-    # Register the daily cleanup job (D-17)
-    scheduler.add_job(
-        cleanup_expired_emails,
-        trigger=CronTrigger(hour=3, minute=0),
-        id="email_retention_cleanup",
-        replace_existing=True,
-    )
-    logger.info("Registered daily email cleanup job at 03:00")
+    # Email cleanup is NOT auto-scheduled — user controls data retention manually.

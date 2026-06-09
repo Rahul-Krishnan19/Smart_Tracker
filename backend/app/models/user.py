@@ -24,3 +24,4 @@ class User(Base):
     transactions = relationship("Transaction", back_populates="user", cascade="all, delete-orphan")
     sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
     emails = relationship("EmailMetadata", back_populates="user", cascade="all, delete-orphan")
+    email_sources = relationship("EmailSourceConfig", back_populates="user", cascade="all, delete-orphan")

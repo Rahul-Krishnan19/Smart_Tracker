@@ -47,24 +47,24 @@ def test_can_parse_rejects_other(parser):
 
 
 @pytest.mark.skipif(not SBI_AVAILABLE, reason="SBIParser not yet created")
-def test_parse_nach_amount(parser, sample_sbi_nach_email):
+def test_nach_email_skipped(parser, sample_sbi_nach_email):
+    """NACH debits are investments/SIPs — must be ignored (return None)."""
     parsed = parser.parse(sample_sbi_nach_email)
-    assert parsed is not None
-    assert parsed.amount == Decimal("35000.00")
+    assert parsed is None
 
 
 @pytest.mark.skipif(not SBI_AVAILABLE, reason="SBIParser not yet created")
-def test_parse_nach_date(parser, sample_sbi_nach_email):
-    parsed = parser.parse(sample_sbi_nach_email)
+def test_parse_transfer_amount(parser, sample_sbi_transfer_email):
+    parsed = parser.parse(sample_sbi_transfer_email)
     assert parsed is not None
-    assert parsed.transaction_date == date(2026, 4, 2)
+    assert parsed.amount == Decimal("215.00")
 
 
 @pytest.mark.skipif(not SBI_AVAILABLE, reason="SBIParser not yet created")
-def test_parse_description_nach(parser, sample_sbi_nach_email):
-    parsed = parser.parse(sample_sbi_nach_email)
+def test_parse_transfer_date(parser, sample_sbi_transfer_email):
+    parsed = parser.parse(sample_sbi_transfer_email)
     assert parsed is not None
-    assert parsed.description == "SBI NACH Debit"
+    assert parsed.transaction_date == date(2026, 3, 6)
 
 
 @pytest.mark.skipif(not SBI_AVAILABLE, reason="SBIParser not yet created")
@@ -75,22 +75,22 @@ def test_parse_description_transfer(parser, sample_sbi_transfer_email):
 
 
 @pytest.mark.skipif(not SBI_AVAILABLE, reason="SBIParser not yet created")
-def test_payment_source(parser, sample_sbi_nach_email):
-    parsed = parser.parse(sample_sbi_nach_email)
+def test_payment_source(parser, sample_sbi_transfer_email):
+    parsed = parser.parse(sample_sbi_transfer_email)
     assert parsed is not None
     assert parsed.payment_source == "SBI \u20194599"
 
 
 @pytest.mark.skipif(not SBI_AVAILABLE, reason="SBIParser not yet created")
-def test_payment_method(parser, sample_sbi_nach_email):
-    parsed = parser.parse(sample_sbi_nach_email)
+def test_payment_method(parser, sample_sbi_transfer_email):
+    parsed = parser.parse(sample_sbi_transfer_email)
     assert parsed is not None
     assert parsed.payment_method == "Net Banking"
 
 
 @pytest.mark.skipif(not SBI_AVAILABLE, reason="SBIParser not yet created")
-def test_merchant_is_none(parser, sample_sbi_nach_email):
-    parsed = parser.parse(sample_sbi_nach_email)
+def test_merchant_is_none(parser, sample_sbi_transfer_email):
+    parsed = parser.parse(sample_sbi_transfer_email)
     assert parsed is not None
     assert parsed.merchant is None
 

@@ -37,30 +37,46 @@ export const authApi = {
   me: () => api.get('/auth/me'),
 }
 
+// Strip params that are empty strings, null, or undefined before sending.
+function cleanParams(params) {
+  const out = {}
+  for (const [k, v] of Object.entries(params ?? {})) {
+    if (v !== '' && v !== null && v !== undefined) out[k] = v
+  }
+  return out
+}
+
 // --- Transactions ---
 export const transactionsApi = {
-  list: (params) => api.get('/transactions', { params }),
+  list: (params) => api.get('/transactions', { params: cleanParams(params) }),
   create: (data) => api.post('/transactions', data),
   get: (id) => api.get(`/transactions/${id}`),
   update: (id, data) => api.put(`/transactions/${id}`, data),
   delete: (id) => api.delete(`/transactions/${id}`),
-  summary: (params) => api.get('/transactions/summary', { params }),
-  export: (params) => api.get('/transactions/export', { params, responseType: 'blob' }),
+  summary: (params) => api.get('/transactions/summary', { params: cleanParams(params) }),
+  export: (params) => api.get('/transactions/export', { params: cleanParams(params), responseType: 'blob' }),
   paymentSources: () => api.get('/transactions/payment-sources'),
   merchants: (q) => api.get('/transactions/merchants', { params: { q } }),
   bulkCategorize: (data) => api.post('/transactions/bulk-categorize', data),
   updateCategory: (id, data) => api.put(`/transactions/${id}/category`, data),
-  merchantBreakdown: (params) => api.get('/transactions/merchant-breakdown', { params }),
+  merchantBreakdown: (params) => api.get('/transactions/merchant-breakdown', { params: cleanParams(params) }),
   categories: () => api.get('/transactions/categories'),
 }
 
 export const analyticsApi = {
-  trend: (params) => api.get('/analytics/trend', { params }),
+  trend: (params) => api.get('/analytics/trend', { params: cleanParams(params) }),
   getSpendingLimit: (granularity) =>
     api.get('/analytics/spending-limit', { params: { granularity } }),
   putSpendingLimit: (data) => api.put('/analytics/spending-limit', data),
   deleteSpendingLimit: (granularity) =>
     api.delete('/analytics/spending-limit', { params: { granularity } }),
+}
+
+export const gmailSourcesApi = {
+  list: () => api.get('/gmail/sources'),
+  add: (data) => api.post('/gmail/sources', data),
+  toggle: (id, enabled) => api.put(`/gmail/sources/${id}`, { enabled }),
+  remove: (id) => api.delete(`/gmail/sources/${id}`),
 }
 
 export const insightsApi = {

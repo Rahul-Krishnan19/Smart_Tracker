@@ -8,6 +8,10 @@ Flow:
   GET  /api/gmail/status     → returns connection status
   PUT  /api/gmail/settings   → update auto-sync settings
   DELETE /api/gmail/disconnect → removes stored token
+  GET  /api/gmail/sources    → list email source configs for current user
+  POST /api/gmail/sources    → add a custom source
+  PUT  /api/gmail/sources/{id} → toggle enabled
+  DELETE /api/gmail/sources/{id} → remove a custom source
 """
 from datetime import datetime, timezone
 from typing import Optional
@@ -20,11 +24,31 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.api.routes.auth import get_current_user
 from app.models.user import User
+from app.models.email_source_config import EmailSourceConfig
+from app.parsers.bank_registry import BANK_REGISTRY
 from app.services.gmail_service import gmail_service
 from app.services.email_sync_service import email_sync_service
 from app.scheduler import register_sync_job, unregister_sync_job
 
 router = APIRouter()
+
+
+def _seed_sources_for_user(user_id: int, db: Session) -> None:
+    """Insert default bank sources for a user if they have none yet."""
+    existing = db.query(EmailSourceConfig).filter(
+        EmailSourceConfig.user_id == user_id
+    ).count()
+    if existing > 0:
+        return
+    for entry in BANK_REGISTRY:
+        db.add(EmailSourceConfig(
+            user_id=user_id,
+            bank_name=entry.bank_name,
+            sender_pattern=entry.sender_pattern,
+            is_builtin=True,
+            enabled=True,
+        ))
+    db.commit()
 
 
 class CodeExchange(BaseModel):
@@ -49,6 +73,7 @@ def exchange_code(
         raise HTTPException(status_code=400, detail=f"OAuth exchange failed: {e}")
     current_user.gmail_token_encrypted = encrypted_token
     db.commit()
+    _seed_sources_for_user(current_user.id, db)
     return {"status": "connected"}
 
 
@@ -92,7 +117,8 @@ def gmail_status(current_user: User = Depends(get_current_user)):
     return {
         "connected": current_user.gmail_token_encrypted is not None,
         "user": current_user.username,
-        "last_synced_at": current_user.last_synced_at.isoformat() if current_user.last_synced_at else None,
+        "last_synced_at": (current_user.last_synced_at.replace(tzinfo=timezone.utc).isoformat()
+                           if current_user.last_synced_at else None),
         "sync_enabled": current_user.sync_enabled,
         "sync_interval_hours": current_user.sync_interval_hours,
     }
@@ -100,7 +126,7 @@ def gmail_status(current_user: User = Depends(get_current_user)):
 
 @router.post("/sync")
 def sync_emails(
-    max_emails: int = 50,
+    max_emails: int = 200,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -180,3 +206,118 @@ def disconnect_gmail(
     current_user.gmail_token_encrypted = None
     db.commit()
     return {"status": "disconnected"}
+
+
+# ---------------------------------------------------------------------------
+# Email source management
+# ---------------------------------------------------------------------------
+
+class SourceCreate(BaseModel):
+    bank_name: str
+    sender_pattern: str
+
+
+class SourceUpdate(BaseModel):
+    enabled: bool
+
+
+@router.get("/sources")
+def list_sources(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return all email source configs for the current user."""
+    _seed_sources_for_user(current_user.id, db)
+    sources = (
+        db.query(EmailSourceConfig)
+        .filter(EmailSourceConfig.user_id == current_user.id)
+        .order_by(EmailSourceConfig.is_builtin.desc(), EmailSourceConfig.bank_name)
+        .all()
+    )
+    return [
+        {
+            "id": s.id,
+            "bank_name": s.bank_name,
+            "sender_pattern": s.sender_pattern,
+            "is_builtin": s.is_builtin,
+            "enabled": s.enabled,
+        }
+        for s in sources
+    ]
+
+
+@router.post("/sources")
+def add_source(
+    body: SourceCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Add a custom email source for the current user."""
+    pattern = body.sender_pattern.strip().lower()
+    bank = body.bank_name.strip()
+    if not pattern or not bank:
+        raise HTTPException(status_code=422, detail="bank_name and sender_pattern are required")
+
+    existing = db.query(EmailSourceConfig).filter(
+        EmailSourceConfig.user_id == current_user.id,
+        EmailSourceConfig.sender_pattern == pattern,
+    ).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="A source with this sender pattern already exists")
+
+    source = EmailSourceConfig(
+        user_id=current_user.id,
+        bank_name=bank,
+        sender_pattern=pattern,
+        is_builtin=False,
+        enabled=True,
+    )
+    db.add(source)
+    db.commit()
+    db.refresh(source)
+    return {
+        "id": source.id,
+        "bank_name": source.bank_name,
+        "sender_pattern": source.sender_pattern,
+        "is_builtin": source.is_builtin,
+        "enabled": source.enabled,
+    }
+
+
+@router.put("/sources/{source_id}")
+def update_source(
+    source_id: int,
+    body: SourceUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Toggle enabled state of a source."""
+    source = db.query(EmailSourceConfig).filter(
+        EmailSourceConfig.id == source_id,
+        EmailSourceConfig.user_id == current_user.id,
+    ).first()
+    if not source:
+        raise HTTPException(status_code=404, detail="Source not found")
+    source.enabled = body.enabled
+    db.commit()
+    return {"id": source.id, "enabled": source.enabled}
+
+
+@router.delete("/sources/{source_id}")
+def delete_source(
+    source_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Remove a custom source. Built-in sources cannot be deleted."""
+    source = db.query(EmailSourceConfig).filter(
+        EmailSourceConfig.id == source_id,
+        EmailSourceConfig.user_id == current_user.id,
+    ).first()
+    if not source:
+        raise HTTPException(status_code=404, detail="Source not found")
+    if source.is_builtin:
+        raise HTTPException(status_code=400, detail="Built-in sources cannot be deleted. Disable them instead.")
+    db.delete(source)
+    db.commit()
+    return {"status": "deleted"}

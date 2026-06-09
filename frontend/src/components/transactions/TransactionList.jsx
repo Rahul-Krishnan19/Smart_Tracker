@@ -4,18 +4,22 @@ import TransactionForm from './TransactionForm'
 import { transactionsApi } from '../../services/api'
 
 const CATEGORY_COLORS = {
-  'Rent': 'bg-blue-100 text-blue-800',
-  'Groceries': 'bg-green-100 text-green-800',
-  'Shopping': 'bg-purple-100 text-purple-800',
-  'Electricity': 'bg-yellow-100 text-yellow-800',
-  'Food & Dining': 'bg-orange-100 text-orange-800',
-  'Transport': 'bg-cyan-100 text-cyan-800',
-  'Entertainment': 'bg-pink-100 text-pink-800',
-  'Healthcare': 'bg-red-100 text-red-800',
-  'Subscriptions': 'bg-teal-100 text-teal-800',
-  'Utilities': 'bg-amber-100 text-amber-800',
-  'Travel': 'bg-sky-100 text-sky-800',
-  'Others': 'bg-gray-100 text-gray-800',
+  'Food & Dining': '#f97316',
+  'Transport': '#0ea5e9',
+  'Groceries': '#10b981',
+  'Shopping': '#8b5cf6',
+  'Entertainment': '#ec4899',
+  'Healthcare': '#f43f5e',
+  'Subscriptions': '#6366f1',
+  'Utilities': '#f59e0b',
+  'Rent': '#14b8a6',
+  'Travel': '#06b6d4',
+  'Electricity': '#f59e0b',
+  'Others': '#94a3b8',
+}
+
+function categoryColor(cat) {
+  return CATEGORY_COLORS[cat] || '#94a3b8'
 }
 
 const PAYMENT_ICONS = {
@@ -140,8 +144,8 @@ export default function TransactionList({ transactions, onRefresh, loading, onBu
     <div className="overflow-hidden">
       {/* Bulk action bar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center gap-3 px-4 py-2 bg-indigo-50 border-b border-indigo-100">
-          <span className="text-sm text-indigo-700 font-medium">{selectedIds.size} selected</span>
+        <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50 border-b border-emerald-100">
+          <span className="text-sm text-emerald-700 font-medium">{selectedIds.size} selected</span>
           <select
             value={bulkCategory}
             onChange={e => setBulkCategory(e.target.value)}
@@ -159,7 +163,7 @@ export default function TransactionList({ transactions, onRefresh, loading, onBu
           </button>
           <button
             onClick={() => setSelectedIds(new Set())}
-            className="text-sm text-gray-500 hover:text-gray-700"
+            className="text-sm text-slate-500 hover:text-slate-700"
           >
             Clear
           </button>
@@ -168,28 +172,28 @@ export default function TransactionList({ transactions, onRefresh, loading, onBu
 
       <table className="w-full">
         <thead>
-          <tr className="border-b border-gray-200 bg-gray-50">
+          <tr className="border-b border-slate-100 bg-slate-50/60">
             <th className="px-4 py-3 w-8">
               <input
                 type="checkbox"
                 checked={transactions.length > 0 && selectedIds.size === transactions.length}
                 onChange={toggleSelectAll}
-                className="rounded border-gray-300"
+                className="rounded border-slate-300 accent-emerald-500"
               />
             </th>
-            <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Date</th>
-            <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Description</th>
-            <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Category</th>
-            <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Method</th>
-            <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Amount</th>
-            <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Actions</th>
+            <th className="text-left section-label px-4 py-3">Date</th>
+            <th className="text-left section-label px-4 py-3">Description</th>
+            <th className="text-left section-label px-4 py-3">Category</th>
+            <th className="text-left section-label px-4 py-3">Method</th>
+            <th className="text-right section-label px-4 py-3">Amount</th>
+            <th className="text-right section-label px-4 py-3">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-slate-50">
           {transactions.map((tx) => (
             editingId === tx.id ? (
               <tr key={tx.id}>
-                <td colSpan={7} className="px-4 py-4 bg-indigo-50">
+                <td colSpan={7} className="px-4 py-4 bg-emerald-50/50">
                   <TransactionForm
                     initialValues={{
                       transaction_date: tx.transaction_date,
@@ -207,23 +211,23 @@ export default function TransactionList({ transactions, onRefresh, loading, onBu
                 </td>
               </tr>
             ) : (
-              <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
+              <tr key={tx.id} className="hover:bg-slate-50/80 transition-colors">
                 <td className="px-4 py-3">
                   <input
                     type="checkbox"
                     checked={selectedIds.has(tx.id)}
                     onChange={() => toggleSelect(tx.id)}
-                    className="rounded border-gray-300"
+                    className="rounded border-slate-300 accent-emerald-500"
                   />
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
+                <td className="px-4 py-3 text-sm text-slate-500 whitespace-nowrap" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
                   {format(new Date(tx.transaction_date), 'dd MMM yyyy')}
                 </td>
                 <td className="px-4 py-3 max-w-xs">
-                  <div className="text-sm font-medium text-gray-900 truncate">{tx.description}</div>
-                  {tx.merchant && <div className="text-xs text-gray-400 truncate">{tx.merchant}</div>}
-                  {tx.payment_source && <div className="text-xs text-gray-400 truncate">{tx.payment_source}</div>}
-                  {tx.notes && <div className="text-xs text-gray-400 italic truncate">{tx.notes}</div>}
+                  <div className="text-sm font-semibold text-slate-900 truncate">{tx.description}</div>
+                  {tx.merchant && <div className="text-xs text-slate-400 truncate">{tx.merchant}</div>}
+                  {tx.payment_source && <div className="text-xs text-slate-400 truncate">{tx.payment_source}</div>}
+                  {tx.notes && <div className="text-xs text-slate-400 italic truncate">{tx.notes}</div>}
                 </td>
                 <td className="px-4 py-3">
                   {categoryEdit?.txId === tx.id ? (
@@ -236,32 +240,34 @@ export default function TransactionList({ transactions, onRefresh, loading, onBu
                         {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                       <div className="flex gap-1">
-                        <button onClick={() => saveCategoryEdit(tx)} disabled={categoryEditLoading} className="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Save</button>
-                        <button onClick={() => setCategoryEdit(null)} className="text-xs text-gray-500 hover:text-gray-700">Cancel</button>
+                        <button onClick={() => saveCategoryEdit(tx)} disabled={categoryEditLoading} className="text-xs text-emerald-600 hover:text-emerald-800 font-medium">Save</button>
+                        <button onClick={() => setCategoryEdit(null)} className="text-xs text-slate-500 hover:text-slate-700">Cancel</button>
                       </div>
                     </div>
                   ) : (
                     <span
-                      className={`badge cursor-pointer ${CATEGORY_COLORS[tx.category] ?? 'bg-gray-100 text-gray-800'}`}
+                      className="badge cursor-pointer gap-1.5"
+                      style={{ backgroundColor: `${categoryColor(tx.category)}1a`, color: categoryColor(tx.category) }}
                       onClick={() => setCategoryEdit({ txId: tx.id, value: tx.category })}
                       title="Click to re-categorize"
                     >
+                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: categoryColor(tx.category) }} />
                       {tx.category}
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
+                <td className="px-4 py-3 text-sm text-slate-500">
                   <span title={tx.payment_method}>
                     {PAYMENT_ICONS[tx.payment_method] ?? '💰'} {tx.payment_method}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900 whitespace-nowrap">
-                  {formatAmount(tx.amount)}
+                <td className="px-4 py-3 text-right whitespace-nowrap">
+                  <span className="mono-amount text-sm text-slate-900">{formatAmount(tx.amount)}</span>
                 </td>
                 <td className="px-4 py-3 text-right whitespace-nowrap">
                   <button
                     onClick={() => setEditingId(tx.id)}
-                    className="text-indigo-600 hover:text-indigo-800 text-sm mr-3 font-medium"
+                    className="text-emerald-600 hover:text-emerald-800 text-sm mr-3 font-medium"
                   >
                     Edit
                   </button>

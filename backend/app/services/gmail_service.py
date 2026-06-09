@@ -20,12 +20,17 @@ from app.services.crypto_service import crypto_service
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
-# Gmail search query — fetch transaction alert emails from major Indian banks
-GMAIL_QUERY = (
-    "from:(hdfcbank.bank.in OR hdfcbank.com OR hdfc.com "
-    "OR icicibank.com OR sbi.bank.in) "
-    "newer_than:90d"
-)
+_FALLBACK_PATTERNS = [
+    "hdfcbank.com", "hdfc.com", "hdfcbank.bank.in",
+    "icicibank.com", "alerts.sbi.bank.in",
+]
+
+
+def build_gmail_query(sender_patterns: list[str]) -> str:
+    """Build a Gmail search query from a list of sender patterns."""
+    patterns = sender_patterns or _FALLBACK_PATTERNS
+    from_clause = " OR ".join(patterns)
+    return f"from:({from_clause}) newer_than:90d"
 
 
 def _build_flow() -> Flow:
@@ -113,8 +118,9 @@ class GmailService:
     def fetch_transaction_emails(
         self,
         encrypted_token: str,
-        max_results: int = 50,
+        max_results: int = 200,
         page_token: Optional[str] = None,
+        sender_patterns: Optional[list[str]] = None,
     ) -> list[dict]:
         """
         Fetch transaction emails from Gmail.
@@ -122,11 +128,12 @@ class GmailService:
         """
         service = self._get_service(encrypted_token)
         results = []
+        query = build_gmail_query(sender_patterns or [])
 
         try:
             params = {
                 "userId": "me",
-                "q": GMAIL_QUERY,
+                "q": query,
                 "maxResults": max_results,
             }
             if page_token:

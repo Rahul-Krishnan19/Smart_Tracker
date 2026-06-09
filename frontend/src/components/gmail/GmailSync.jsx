@@ -1,9 +1,134 @@
 import { useState, useEffect } from 'react'
 import api from '../../services/api'
+import { gmailSourcesApi } from '../../services/api'
 
 function formatIST(isoString) {
   if (!isoString) return null
   return new Date(isoString).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+}
+
+function SourcesPanel() {
+  const [sources, setSources] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [newBank, setNewBank] = useState('')
+  const [newPattern, setNewPattern] = useState('')
+  const [adding, setAdding] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    gmailSourcesApi.list()
+      .then(r => setSources(r.data))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  async function handleToggle(source) {
+    const updated = !source.enabled
+    setSources(prev => prev.map(s => s.id === source.id ? { ...s, enabled: updated } : s))
+    try {
+      await gmailSourcesApi.toggle(source.id, updated)
+    } catch {
+      setSources(prev => prev.map(s => s.id === source.id ? { ...s, enabled: source.enabled } : s))
+    }
+  }
+
+  async function handleAdd() {
+    const bank = newBank.trim()
+    const pattern = newPattern.trim().toLowerCase()
+    if (!bank || !pattern) return
+    if (!window.confirm(`Add "${pattern}" as a mail source for ${bank}? Emails from this sender will be fetched on next sync.`)) return
+    setAdding(true)
+    setError('')
+    try {
+      const res = await gmailSourcesApi.add({ bank_name: bank, sender_pattern: pattern })
+      setSources(prev => [...prev, res.data])
+      setNewBank('')
+      setNewPattern('')
+    } catch (e) {
+      setError(e.response?.data?.detail || 'Failed to add source.')
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  async function handleDelete(source) {
+    if (!window.confirm(`Remove ${source.bank_name} (${source.sender_pattern})? Emails from this sender will no longer be synced.`)) return
+    try {
+      await gmailSourcesApi.remove(source.id)
+      setSources(prev => prev.filter(s => s.id !== source.id))
+    } catch (e) {
+      setError(e.response?.data?.detail || 'Failed to remove source.')
+    }
+  }
+
+  if (loading) return <p className="text-xs text-gray-400 py-1">Loading sources…</p>
+
+  return (
+    <div className="mt-2 border border-gray-200 rounded-lg overflow-hidden text-sm">
+      <div className="divide-y divide-gray-100">
+        {sources.map(source => (
+          <div key={source.id} className="flex items-center gap-3 px-3 py-2 bg-white hover:bg-gray-50">
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={source.enabled}
+                onChange={() => handleToggle(source)}
+                className="sr-only peer"
+              />
+              <div className="w-8 h-4 bg-gray-200 peer-checked:bg-blue-500 rounded-full transition-colors
+                after:content-[''] after:absolute after:top-0.5 after:left-0.5
+                after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all
+                peer-checked:after:translate-x-4" />
+            </label>
+            <span className={`flex-1 ${source.enabled ? 'text-gray-800' : 'text-gray-400'}`}>
+              <span className="font-medium">{source.bank_name}</span>
+              <span className="text-gray-400 mx-1">—</span>
+              <span className="font-mono text-xs">{source.sender_pattern}</span>
+            </span>
+            {!source.is_builtin && (
+              <button
+                onClick={() => handleDelete(source)}
+                className="text-gray-300 hover:text-red-400 transition-colors text-xs px-1"
+                title="Remove source"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Add new source row */}
+      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border-t border-gray-200">
+        <input
+          type="text"
+          value={newBank}
+          onChange={e => setNewBank(e.target.value)}
+          placeholder="Bank name"
+          className="flex-1 text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
+        />
+        <input
+          type="text"
+          value={newPattern}
+          onChange={e => setNewPattern(e.target.value)}
+          placeholder="sender domain or email"
+          className="flex-1 text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
+          onKeyDown={e => e.key === 'Enter' && handleAdd()}
+        />
+        <button
+          onClick={handleAdd}
+          disabled={adding || !newBank.trim() || !newPattern.trim()}
+          className="text-xs px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          {adding ? '…' : 'Add'}
+        </button>
+      </div>
+
+      {error && (
+        <p className="text-xs text-red-600 px-3 py-1 bg-red-50">{error}</p>
+      )}
+    </div>
+  )
 }
 
 export default function GmailSync({ onSyncComplete }) {
@@ -16,6 +141,7 @@ export default function GmailSync({ onSyncComplete }) {
   const [syncEnabled, setSyncEnabled] = useState(false)
   const [syncIntervalHours, setSyncIntervalHours] = useState(24)
   const [savingSettings, setSavingSettings] = useState(false)
+  const [showSources, setShowSources] = useState(false)
 
   useEffect(() => {
     api.get('/gmail/status')
@@ -51,10 +177,9 @@ export default function GmailSync({ onSyncComplete }) {
     setSyncing(true)
     setSyncResult(null)
     try {
-      const res = await api.post('/gmail/sync?max_emails=50')
+      const res = await api.post('/gmail/sync?max_emails=200')
       setSyncResult(res.data)
       if (res.data.transactions_created > 0) onSyncComplete?.()
-      // Refresh status to get updated last_synced_at
       api.get('/gmail/status').then(r => setLastSyncedAt(r.data.last_synced_at)).catch(() => {})
     } catch (e) {
       setError(e.response?.data?.detail || 'Sync failed. Please try again.')
@@ -71,6 +196,7 @@ export default function GmailSync({ onSyncComplete }) {
       setSyncResult(null)
       setSyncEnabled(false)
       setLastSyncedAt(null)
+      setShowSources(false)
     } catch (e) {
       setError('Failed to disconnect.')
     }
@@ -195,6 +321,18 @@ export default function GmailSync({ onSyncComplete }) {
             {result.emails_fetched} emails fetched from Gmail
             {result.parsed_ok > 0 && ` · ${result.parsed_ok} parsed successfully`}
           </span>
+        </div>
+      )}
+
+      {connected && (
+        <div>
+          <button
+            onClick={() => setShowSources(prev => !prev)}
+            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {showSources ? '▲ Hide sources' : '▼ Manage sources'}
+          </button>
+          {showSources && <SourcesPanel />}
         </div>
       )}
     </div>

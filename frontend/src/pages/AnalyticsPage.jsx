@@ -9,7 +9,24 @@ import GranularityToggle from '../components/analytics/GranularityToggle'
 import FilterPanel from '../components/transactions/FilterPanel'
 import { useFilters } from '../context/FiltersContext'
 
-const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#94a3b8']
+const CATEGORY_COLORS = {
+  'Food & Dining': '#f97316',
+  'Transport': '#0ea5e9',
+  'Groceries': '#10b981',
+  'Shopping': '#8b5cf6',
+  'Entertainment': '#ec4899',
+  'Healthcare': '#f43f5e',
+  'Subscriptions': '#6366f1',
+  'Utilities': '#f59e0b',
+  'Rent': '#14b8a6',
+  'Travel': '#06b6d4',
+  'Others': '#94a3b8',
+}
+const COLORS = ['#f97316', '#0ea5e9', '#10b981', '#8b5cf6', '#ec4899', '#f43f5e', '#6366f1', '#f59e0b', '#14b8a6', '#06b6d4', '#94a3b8']
+
+function getCategoryColor(cat, idx) {
+  return CATEGORY_COLORS[cat] || COLORS[idx % COLORS.length]
+}
 
 function formatINR(v) {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v)
@@ -90,32 +107,57 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Page header */}
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Syne, sans-serif' }}>Analytics</h1>
+        <p className="text-sm text-slate-500 mt-0.5">Understand where your money goes</p>
+      </div>
+
       {/* Full filter panel — same component used on the Transactions page.
           Filter state lives in FiltersContext so it persists across tab switches. */}
       <FilterPanel onFilter={handleApply} loading={loading} defaultValues={analyticsFilters} />
 
-      {/* Trend section (Phase 6) */}
-      <div className="card">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-3">
-            <h3 className="text-sm font-semibold text-gray-700">Spending over time</h3>
+      {/* KPI Cards */}
+      {summary && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="card border-l-4 border-l-emerald-500">
+            <p className="section-label text-slate-400 mb-2">Total Spent</p>
+            <p className="stat-number text-2xl">{formatINR(summary.total_amount)}</p>
             {pctChange != null && (
               <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                  pctChange > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-                }`}
-                title={`Previous period: ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(previousTotal)}`}
+                className={`inline-flex items-center gap-1 text-xs font-medium mt-2 ${pctChange > 0 ? 'text-red-500' : 'text-emerald-500'}`}
+                title={`Previous period: ${formatINR(previousTotal)}`}
               >
                 {pctChange > 0 ? '▲' : '▼'} {Math.abs(pctChange).toFixed(1)}% vs last period
               </span>
             )}
           </div>
+          <div className="card border-l-4 border-l-sky-400">
+            <p className="section-label text-slate-400 mb-2">Transactions</p>
+            <p className="stat-number text-2xl">{summary.transaction_count}</p>
+          </div>
+          <div className="card border-l-4 border-l-violet-400">
+            <p className="section-label text-slate-400 mb-2">Avg per Transaction</p>
+            <p className="stat-number text-2xl">
+              {summary.transaction_count > 0 ? formatINR(summary.total_amount / summary.transaction_count) : '—'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Trend Chart */}
+      <div className="card">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+          <div>
+            <h2 className="text-base font-bold text-slate-900" style={{ fontFamily: 'Syne, sans-serif' }}>Spending Over Time</h2>
+          </div>
           <div className="flex items-center gap-3">
-            <label className="flex items-center gap-1 text-xs text-gray-600">
+            <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={categoryOverlay}
                 onChange={(e) => setCategoryOverlay(e.target.checked)}
+                className="accent-emerald-500 w-3.5 h-3.5"
               />
               Category overlay
             </label>
@@ -127,31 +169,11 @@ export default function AnalyticsPage() {
 
       {summary && (
         <>
-          {/* KPI Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <div className="card text-center">
-              <p className="text-xs text-gray-500 uppercase tracking-wider">Total Spent</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{formatINR(summary.total_amount)}</p>
-            </div>
-            <div className="card text-center">
-              <p className="text-xs text-gray-500 uppercase tracking-wider">Transactions</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{summary.transaction_count}</p>
-            </div>
-            <div className="card text-center">
-              <p className="text-xs text-gray-500 uppercase tracking-wider">Avg per Transaction</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {summary.transaction_count > 0
-                  ? formatINR(summary.total_amount / summary.transaction_count)
-                  : '—'}
-              </p>
-            </div>
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Category Breakdown — Pie Chart */}
+            {/* Category Donut */}
             {summary.category_breakdown.length > 0 && (
               <div className="card">
-                <h3 className="text-sm font-semibold text-gray-700 mb-4">Spending by Category</h3>
+                <h2 className="text-base font-bold text-slate-900 mb-5" style={{ fontFamily: 'Syne, sans-serif' }}>Spending by Category</h2>
                 <ResponsiveContainer width="100%" height={280}>
                   <PieChart>
                     <Pie
@@ -160,101 +182,111 @@ export default function AnalyticsPage() {
                       nameKey="category"
                       cx="50%"
                       cy="50%"
-                      outerRadius={100}
-                      label={({ category, percent }) => `${category} ${(percent * 100).toFixed(0)}%`}
-                      labelLine={false}
+                      innerRadius={70}
+                      outerRadius={110}
+                      paddingAngle={2}
                     >
-                      {summary.category_breakdown.map((_, i) => (
-                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      {summary.category_breakdown.map((entry, i) => (
+                        <Cell key={i} fill={getCategoryColor(entry.category, i)} strokeWidth={0} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v) => formatINR(v)} />
-                    <Legend />
+                    <Tooltip formatter={(v) => formatINR(v)} contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontFamily: 'IBM Plex Mono' }} />
+                    <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ fontFamily: 'DM Sans', fontSize: 12, color: '#64748b' }}>{value}</span>} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             )}
 
-            {/* Payment Method Breakdown — Bar Chart */}
+            {/* Payment Method Bar */}
             {summary.payment_breakdown.length > 0 && (
               <div className="card">
-                <h3 className="text-sm font-semibold text-gray-700 mb-4">Spending by Payment Method</h3>
+                <h2 className="text-base font-bold text-slate-900 mb-5" style={{ fontFamily: 'Syne, sans-serif' }}>By Payment Method</h2>
                 <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={summary.payment_breakdown} layout="vertical" margin={{ left: 16 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                    <XAxis type="number" tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
-                    <YAxis type="category" dataKey="payment_method" width={90} tick={{ fontSize: 12 }} />
-                    <Tooltip formatter={(v) => formatINR(v)} />
-                    <Bar dataKey="total" name="Amount" fill="#6366f1" radius={[0, 4, 4, 0]} />
+                  <BarChart data={summary.payment_breakdown} layout="vertical" margin={{ left: 0, right: 16 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                    <XAxis type="number" tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11, fill: '#94a3b8', fontFamily: 'IBM Plex Mono' }} axisLine={false} tickLine={false} />
+                    <YAxis type="category" dataKey="payment_method" width={96} tick={{ fontSize: 12, fill: '#64748b', fontFamily: 'DM Sans' }} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={(v) => formatINR(v)} contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontFamily: 'IBM Plex Mono' }} />
+                    <Bar dataKey="total" name="Amount" fill="#10b981" radius={[0, 6, 6, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             )}
           </div>
 
-          {/* Category detail table */}
+          {/* Category breakdown table */}
           {summary.category_breakdown.length > 0 && (
             <div className="card">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4">Category Breakdown</h3>
+              <h2 className="text-base font-bold text-slate-900 mb-5" style={{ fontFamily: 'Syne, sans-serif' }}>Category Breakdown</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left font-semibold text-gray-500 py-2">Category</th>
-                      <th className="text-right font-semibold text-gray-500 py-2">Transactions</th>
-                      <th className="text-right font-semibold text-gray-500 py-2">Amount</th>
-                      <th className="text-right font-semibold text-gray-500 py-2">% of Total</th>
+                    <tr className="border-b border-slate-100">
+                      <th className="text-left section-label py-2 font-semibold">Category</th>
+                      <th className="text-right section-label py-2 font-semibold">Txns</th>
+                      <th className="text-right section-label py-2 font-semibold">Amount</th>
+                      <th className="text-right section-label py-2 font-semibold hidden sm:table-cell">Share</th>
+                      <th className="hidden sm:table-cell py-2 w-32"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-slate-50">
                     {summary.category_breakdown
                       .sort((a, b) => b.total - a.total)
-                      .map((row, i) => (
-                        <tr key={row.category} className="hover:bg-gray-50">
-                          <td className="py-2 flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full inline-block" style={{ background: COLORS[i % COLORS.length] }} />
-                            {row.category}
-                          </td>
-                          <td className="py-2 text-right text-gray-500">{row.count}</td>
-                          <td className="py-2 text-right font-medium">{formatINR(row.total)}</td>
-                          <td className="py-2 text-right text-gray-500">
-                            {summary.total_amount > 0
-                              ? `${((row.total / summary.total_amount) * 100).toFixed(1)}%`
-                              : '—'}
-                          </td>
-                        </tr>
-                      ))}
+                      .map((row, i) => {
+                        const color = getCategoryColor(row.category, i)
+                        const pct = summary.total_amount > 0 ? (row.total / summary.total_amount) * 100 : 0
+                        return (
+                          <tr key={row.category} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="py-3 flex items-center gap-2.5">
+                              <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color }} />
+                              <span className="font-medium text-slate-800">{row.category}</span>
+                            </td>
+                            <td className="py-3 text-right text-slate-500">{row.count}</td>
+                            <td className="py-3 text-right mono-amount text-slate-900">{formatINR(row.total)}</td>
+                            <td className="py-3 text-right text-slate-400 hidden sm:table-cell">{pct.toFixed(1)}%</td>
+                            <td className="py-3 hidden sm:table-cell">
+                              <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
                   </tbody>
                 </table>
               </div>
             </div>
           )}
 
-          {/* Merchant Breakdown — Top 10 by spend */}
+          {/* Merchant table */}
           {merchantData && merchantData.merchants.length > 0 && (
             <div className="card" id="merchant-breakdown">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4">Top Merchants by Spend</h3>
+              <h2 className="text-base font-bold text-slate-900 mb-5" style={{ fontFamily: 'Syne, sans-serif' }}>Top Merchants by Spend</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left font-semibold text-gray-500 py-2">#</th>
-                      <th className="text-left font-semibold text-gray-500 py-2">Merchant</th>
-                      <th className="text-right font-semibold text-gray-500 py-2">Total Spend</th>
-                      <th className="text-right font-semibold text-gray-500 py-2">Transactions</th>
-                      <th className="text-right font-semibold text-gray-500 py-2">Avg per Txn</th>
-                      <th className="text-right font-semibold text-gray-500 py-2">% of Total</th>
+                    <tr className="border-b border-slate-100">
+                      <th className="text-left section-label py-2 font-semibold w-8">#</th>
+                      <th className="text-left section-label py-2 font-semibold">Merchant</th>
+                      <th className="text-right section-label py-2 font-semibold">Total</th>
+                      <th className="text-right section-label py-2 font-semibold hidden sm:table-cell">Txns</th>
+                      <th className="text-right section-label py-2 font-semibold hidden md:table-cell">Avg</th>
+                      <th className="text-right section-label py-2 font-semibold hidden md:table-cell">%</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-slate-50">
                     {merchantData.merchants.map((row, i) => (
-                      <tr key={row.merchant} className="hover:bg-gray-50">
-                        <td className="py-2 text-gray-400">{i + 1}</td>
-                        <td className="py-2 font-medium text-gray-900">{row.merchant}</td>
-                        <td className="py-2 text-right font-medium">{formatINR(row.total)}</td>
-                        <td className="py-2 text-right text-gray-500">{row.count}</td>
-                        <td className="py-2 text-right text-gray-500">{formatINR(row.avg)}</td>
-                        <td className="py-2 text-right text-gray-500">{row.pct_of_total.toFixed(1)}%</td>
+                      <tr key={row.merchant} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3">
+                          <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center" style={{ fontFamily: 'IBM Plex Mono' }}>
+                            {i + 1}
+                          </span>
+                        </td>
+                        <td className="py-3 font-semibold text-slate-900">{row.merchant}</td>
+                        <td className="py-3 text-right mono-amount text-slate-900">{formatINR(row.total)}</td>
+                        <td className="py-3 text-right text-slate-500 hidden sm:table-cell">{row.count}</td>
+                        <td className="py-3 text-right text-slate-400 mono-amount hidden md:table-cell">{formatINR(row.avg)}</td>
+                        <td className="py-3 text-right text-slate-400 hidden md:table-cell">{row.pct_of_total.toFixed(1)}%</td>
                       </tr>
                     ))}
                   </tbody>
@@ -264,14 +296,15 @@ export default function AnalyticsPage() {
           )}
 
           {merchantData && merchantData.merchants.length === 0 && summary && summary.transaction_count > 0 && (
-            <div className="card text-center text-gray-400 py-8 text-sm">
+            <div className="card text-center text-slate-400 py-8 text-sm">
               No merchant data for the selected period.
             </div>
           )}
 
           {summary.category_breakdown.length === 0 && (
-            <div className="card text-center text-gray-400 py-12">
-              No transaction data for the selected period.
+            <div className="card text-center text-slate-400 py-16">
+              <p className="text-lg mb-1">No data yet</p>
+              <p className="text-sm">No transactions found for the selected period.</p>
             </div>
           )}
         </>

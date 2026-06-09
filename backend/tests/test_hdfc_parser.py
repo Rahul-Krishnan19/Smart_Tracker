@@ -64,3 +64,16 @@ def test_parse_accepts_email_dict(parser, sample_hdfc_upi_email):
     assert parsed is not None
     assert parsed.amount == Decimal("40.00")
     assert parsed.bank_name == "HDFC Bank"
+
+
+def test_cc_has_been_debited_not_misclassified_as_upi(parser, sample_hdfc_cc_has_been_debited_email):
+    """CC emails using 'has been debited' must NOT be tagged as UPI (regression for 661 Rs / 28 Apr)."""
+    parsed = parser.parse(sample_hdfc_cc_has_been_debited_email)
+    assert parsed is not None
+    assert parsed.payment_method == "Credit Card", (
+        f"Expected Credit Card, got {parsed.payment_method}"
+    )
+    assert parsed.account_last4 == "6054"
+    assert parsed.payment_source == "HDFC CC ’6054"
+    assert parsed.amount == Decimal("661.00")
+    assert parsed.transaction_date == date(2026, 4, 28)

@@ -45,6 +45,11 @@ class SBIParser(BaseEmailParser):
         if "Multi Option Dep" in body_clean or "TDS of" in body_clean:
             return None
 
+        # Skip NACH debits — these are investments/SIPs/loan EMIs, not expenditures
+        type_check = re.search(r'debit by\s+(\w+)', body_clean, re.IGNORECASE)
+        if type_check and type_check.group(1).upper() == "NACH":
+            return None
+
         # Account number: "A/C XXXXX404599" → capture digits after XXXXX, take last 4
         acc_m = re.search(r'A/C\s*XXXXX(\d{4,})', body_clean)
         if not acc_m:

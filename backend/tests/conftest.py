@@ -43,6 +43,22 @@ def sample_hdfc_cc_email():
 
 
 @pytest.fixture
+def sample_hdfc_cc_has_been_debited_email():
+    """HDFC CC alert using 'has been debited' variant — misclassified as UPI before fix."""
+    return {
+        "id": "msg_hdfc_cc_2",
+        "sender": "alerts@hdfcbank.net",
+        "subject": "Transaction Alert",
+        "body": (
+            "Rs.661.00 has been debited from your HDFC Bank Credit Card ending 6054 "
+            "towards AMAZON on 28 Apr, 2026 at 11:22:33. "
+            "For disputes contact cc.disputes@hdfc."
+        ),
+        "received_at": datetime(2026, 4, 28, 11, 22, 33),
+    }
+
+
+@pytest.fixture
 def sample_icici_cc_email():
     return {
         "id": "msg_icici_1",

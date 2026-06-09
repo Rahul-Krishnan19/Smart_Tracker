@@ -1,10 +1,12 @@
 import { createContext, useContext, useState } from 'react'
-import { format, startOfMonth, endOfMonth } from 'date-fns'
+import { format, subDays } from 'date-fns'
 
 const today = new Date()
+const thirtyDaysAgo = subDays(today, 30)
+
 const defaultTxFilters = {
-  date_from: format(startOfMonth(today), 'yyyy-MM-dd'),
-  date_to: format(endOfMonth(today), 'yyyy-MM-dd'),
+  date_from: format(thirtyDaysAgo, 'yyyy-MM-dd'),
+  date_to: format(today, 'yyyy-MM-dd'),
   category: '',
   payment_method: '',
   payment_source: '',
@@ -14,8 +16,8 @@ const defaultTxFilters = {
 }
 
 const defaultAnalyticsFilters = {
-  date_from: format(startOfMonth(today), 'yyyy-MM-dd'),
-  date_to: format(endOfMonth(today), 'yyyy-MM-dd'),
+  date_from: format(thirtyDaysAgo, 'yyyy-MM-dd'),
+  date_to: format(today, 'yyyy-MM-dd'),
   category: '',
   payment_source: '',
   search: '',

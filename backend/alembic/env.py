@@ -20,6 +20,10 @@ if config.config_file_name is not None:
 # Import all models here for autogenerate support
 from app.database import Base
 from app.models import user, transaction, email_metadata, session, category_rule, spending_limit
+from app.config import settings
+
+# Override URL from app config so DATABASE_URL env var is always respected
+config.set_main_option("sqlalchemy.url", settings.database_url)
 
 # add your model's MetaData object here
 # for 'autogenerate' support

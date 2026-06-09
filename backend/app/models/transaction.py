@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 from app.database import Base
 
 
-CATEGORIES = ["Rent", "Groceries", "Shopping", "Electricity", "Food & Dining", "Transport", "Entertainment", "Healthcare", "Others"]
+CATEGORIES = ["Rent", "Groceries", "Shopping", "Electricity", "Food & Dining", "Transport", "Entertainment", "Healthcare", "Subscriptions", "Utilities", "Travel", "Others"]
 PAYMENT_METHODS = ["Credit Card", "UPI", "Cash", "Debit Card", "Net Banking", "Others"]
 SOURCES = ["manual", "email", "upload"]
 

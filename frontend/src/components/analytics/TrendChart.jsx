@@ -27,7 +27,7 @@ export default function TrendChart({ data, categoryOverlay = false }) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="text-center text-gray-400 py-12 text-sm">
+      <div className="text-center text-slate-400 py-12 text-sm">
         No transaction data for the selected period.
       </div>
     )
@@ -63,14 +63,14 @@ export default function TrendChart({ data, categoryOverlay = false }) {
       >
         <defs>
           <linearGradient id="totalGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25} />
-            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-        <XAxis dataKey="period_label" tick={{ fontSize: 11 }} />
-        <YAxis tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
-        <Tooltip formatter={(v) => formatINR(v)} />
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+        <XAxis dataKey="period_label" tick={{ fontSize: 11, fill: '#94a3b8', fontFamily: 'IBM Plex Mono' }} axisLine={false} tickLine={false} />
+        <YAxis tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11, fill: '#94a3b8', fontFamily: 'IBM Plex Mono' }} axisLine={false} tickLine={false} />
+        <Tooltip formatter={(v) => formatINR(v)} contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontFamily: 'IBM Plex Mono' }} />
         {categoryOverlay && <Legend wrapperStyle={{ fontSize: 11 }} />}
 
         {!categoryOverlay && (
@@ -78,10 +78,10 @@ export default function TrendChart({ data, categoryOverlay = false }) {
             type="monotone"
             dataKey="total"
             name="Total"
-            stroke="#6366f1"
+            stroke="#10b981"
             strokeWidth={2}
             fill="url(#totalGradient)"
-            dot={{ r: 3, fill: '#6366f1' }}
+            dot={{ r: 3, fill: '#10b981' }}
             activeDot={{ r: 5 }}
             connectNulls
           />
