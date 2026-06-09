@@ -1,8 +1,10 @@
 """Anomaly detection — D-01 rules. Idempotent via existence checks."""
+from __future__ import annotations
 from datetime import datetime, timedelta, date
 from decimal import Decimal
 from typing import List, Optional
 from sqlalchemy.orm import Session
+from app.services.db_compat import date_format
 from sqlalchemy import func, and_
 
 from app.models.anomaly import Anomaly
@@ -130,7 +132,7 @@ class AnomalyService:
             .scalar()
         )
         distinct_months = (
-            db.query(func.count(func.distinct(func.strftime("%Y-%m", Transaction.transaction_date))))
+            db.query(func.count(func.distinct(date_format("%Y-%m", Transaction.transaction_date))))
             .filter(
                 Transaction.user_id == user_id,
                 Transaction.category == tx.category,

@@ -9,6 +9,7 @@ from decimal import Decimal
 from typing import Literal, Optional
 
 from sqlalchemy import func, or_
+from app.services.db_compat import date_format
 from sqlalchemy.orm import Session
 
 from app.models.transaction import Transaction
@@ -146,7 +147,7 @@ class TrendService:
         # ------------------------------------------------------------------
         # Main aggregation query — one row per period
         # ------------------------------------------------------------------
-        period_key_col = func.strftime(fmt, Transaction.transaction_date).label("period_key")
+        period_key_col = date_format(fmt, Transaction.transaction_date).label("period_key")
 
         rows = (
             base.with_entities(
@@ -156,8 +157,8 @@ class TrendService:
                 func.min(Transaction.transaction_date).label("min_date"),
                 func.max(Transaction.transaction_date).label("max_date"),
             )
-            .group_by(func.strftime(fmt, Transaction.transaction_date))
-            .order_by(func.strftime(fmt, Transaction.transaction_date))
+            .group_by(date_format(fmt, Transaction.transaction_date))
+            .order_by(date_format(fmt, Transaction.transaction_date))
             .all()
         )
 
@@ -166,12 +167,12 @@ class TrendService:
         # ------------------------------------------------------------------
         cat_rows = (
             base.with_entities(
-                func.strftime(fmt, Transaction.transaction_date).label("period_key"),
+                date_format(fmt, Transaction.transaction_date).label("period_key"),
                 Transaction.category,
                 func.sum(Transaction.amount).label("cat_total"),
             )
             .group_by(
-                func.strftime(fmt, Transaction.transaction_date),
+                date_format(fmt, Transaction.transaction_date),
                 Transaction.category,
             )
             .all()

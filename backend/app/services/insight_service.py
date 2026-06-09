@@ -1,6 +1,7 @@
 from __future__ import annotations
 """Insights feed regeneration — D-12 types, D-13 priority cap, D-14 active-only delete."""
 from datetime import datetime, date, timedelta
+from app.services.db_compat import date_format
 from decimal import Decimal
 from typing import List
 from sqlalchemy.orm import Session
@@ -168,11 +169,11 @@ class InsightService:
     def _rolling_avg_monthly(self, db: Session, user_id: int, today: datetime) -> float:
         since = today.date() - timedelta(days=180)
         rows = (
-            db.query(func.strftime("%Y-%m", Transaction.transaction_date),
+            db.query(date_format("%Y-%m", Transaction.transaction_date),
                      func.sum(Transaction.amount))
             .filter(Transaction.user_id == user_id,
                     Transaction.transaction_date >= since)
-            .group_by(func.strftime("%Y-%m", Transaction.transaction_date)).all()
+            .group_by(date_format("%Y-%m", Transaction.transaction_date)).all()
         )
         if not rows:
             return 0.0

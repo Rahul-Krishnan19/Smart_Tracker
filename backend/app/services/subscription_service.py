@@ -7,6 +7,7 @@ from collections import defaultdict
 from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from app.services.db_compat import date_format
 
 from app.models.subscription import Subscription
 from app.models.transaction import Transaction
@@ -19,7 +20,7 @@ class SubscriptionService:
         rows = (
             db.query(
                 Transaction.merchant,
-                func.strftime("%Y-%m", Transaction.transaction_date).label("ym"),
+                date_format("%Y-%m", Transaction.transaction_date).label("ym"),
                 Transaction.amount,
             )
             .filter(Transaction.user_id == user_id, Transaction.merchant.isnot(None))
