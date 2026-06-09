@@ -19,7 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column('users', sa.Column('sync_enabled', sa.Boolean(), nullable=False, server_default='0'))
+    op.add_column('users', sa.Column('sync_enabled', sa.Boolean(), nullable=False, server_default='false'))
     op.add_column('users', sa.Column('sync_interval_hours', sa.Integer(), nullable=True))
     op.add_column('users', sa.Column('last_synced_at', sa.DateTime(timezone=True), nullable=True))
 
