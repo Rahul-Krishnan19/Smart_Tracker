@@ -1,4 +1,6 @@
+from __future__ import annotations
 from pydantic import BaseModel, EmailStr, field_validator
+from typing import Optional
 import re
 
 
@@ -54,12 +56,12 @@ class TOTPSetupResponse(BaseModel):
 class LoginResponse(BaseModel):
     requires_totp: bool
     totp_enrolled: bool = False
-    temp_token: str | None = None
+    temp_token: Optional[str] = None
     # Populated when TOTP is disabled — client can use this directly
-    access_token: str | None = None
+    access_token: Optional[str] = None
     token_type: str = "bearer"
-    user_id: int | None = None
-    username: str | None = None
+    user_id: Optional[int] = None
+    username: Optional[str] = None
     message: str = ""
 
 
