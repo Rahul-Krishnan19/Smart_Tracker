@@ -73,7 +73,10 @@ def exchange_code(
         raise HTTPException(status_code=400, detail=f"OAuth exchange failed: {e}")
     current_user.gmail_token_encrypted = encrypted_token
     db.commit()
-    _seed_sources_for_user(current_user.id, db)
+    try:
+        _seed_sources_for_user(current_user.id, db)
+    except Exception:
+        db.rollback()
     return {"status": "connected"}
 
 
