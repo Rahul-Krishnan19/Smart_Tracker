@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Parser factory — routes emails to the correct bank parser.
 To add a new bank: instantiate its parser here and add to PARSERS list.

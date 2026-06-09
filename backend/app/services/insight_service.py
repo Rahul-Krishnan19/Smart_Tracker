@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Insights feed regeneration — D-12 types, D-13 priority cap, D-14 active-only delete."""
 from datetime import datetime, date, timedelta
 from decimal import Decimal

@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Phase 07 — Anomaly + insights detection thresholds (D-02).
 Edit values here to adjust detection sensitivity. No code changes elsewhere required.
 """

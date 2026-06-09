@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Transaction CRUD service with filtering, pagination, validation, export, and merchant breakdown.
 """

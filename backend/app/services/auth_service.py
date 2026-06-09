@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Authentication service handling user registration, login, session management, and JWT.
 """

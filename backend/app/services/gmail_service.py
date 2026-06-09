@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Gmail service — OAuth2 flow + fetching and decoding transaction emails.
 Tokens are encrypted at rest using CryptoService before storing in DB.

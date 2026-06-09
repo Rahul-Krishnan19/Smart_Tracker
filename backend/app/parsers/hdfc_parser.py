@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 HDFC Bank email parser — supports:
   - UPI debit alerts  ("Rs.X has been debited from account XXXX to VPA ...")

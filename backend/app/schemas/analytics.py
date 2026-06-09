@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Pydantic schemas for the analytics endpoints.
 Phase 6, Plan 01 — ANA-03, ANA-04, ANA-05, ANA-06

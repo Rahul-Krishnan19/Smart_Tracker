@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 SBI Bank debit email parser.
 Parses debit alerts from cbsalerts.sbi@alerts.sbi.bank.in.

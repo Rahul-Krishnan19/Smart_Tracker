@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Subscription detection per D-07. Re-activates canceled subs per D-11."""
 from datetime import datetime, date
 from decimal import Decimal

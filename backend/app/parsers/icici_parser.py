@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 ICICI Bank Credit Card email parser.
 Parses transaction alerts from credit_cards@icicibank.com.

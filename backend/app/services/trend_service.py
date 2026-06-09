@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 TrendService — time-series aggregation for the analytics trend endpoint.
 Phase 6, Plan 01 — ANA-03, ANA-04, ANA-05, ANA-06

@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Global bank registry — single source of truth for all supported banks.
 

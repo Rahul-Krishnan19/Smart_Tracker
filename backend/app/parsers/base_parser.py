@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Abstract base class for all bank email parsers.
 To add a new bank: subclass BaseEmailParser and register in parser_factory.py.
