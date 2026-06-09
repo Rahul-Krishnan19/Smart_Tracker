@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -130,6 +130,15 @@ export default function LoginForm() {
                 {loading ? 'Signing in…' : 'Sign in'}
               </button>
             </form>
+          )}
+
+          {step === 'credentials' && (
+            <p className="text-center text-sm text-gray-500 mt-6">
+              Don't have an account?{' '}
+              <Link to="/register" className="text-indigo-600 hover:underline font-medium">
+                Create one
+              </Link>
+            </p>
           )}
 
           {step === 'totp_verify' && (

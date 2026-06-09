@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { FiltersProvider } from './context/FiltersContext'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import LoginForm from './components/auth/LoginForm'
+import RegisterForm from './components/auth/RegisterForm'
 import TransactionsPage from './pages/TransactionsPage'
 import AnalyticsPage from './pages/AnalyticsPage'
 import GmailCallbackPage from './pages/GmailCallbackPage'
@@ -150,6 +151,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginForm />} />
+      <Route path="/register" element={<RegisterForm />} />
       <Route path="/transactions" element={<ProtectedRoute><Layout><TransactionsPage /></Layout></ProtectedRoute>} />
       <Route path="/analytics" element={<ProtectedRoute><Layout><AnalyticsPage /></Layout></ProtectedRoute>} />
       <Route path="/auth/gmail/callback" element={<ProtectedRoute><GmailCallbackPage /></ProtectedRoute>} />
