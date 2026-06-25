@@ -90,54 +90,75 @@ class EmailSyncService:
             try:
                 parsed = parse_email(email)
             except Exception as e:
+                db.rollback()
                 meta.parse_status = "failed"
                 meta.parse_error = str(e)[:500]
                 summary["parse_failed"] += 1
-                db.commit()
+                try:
+                    db.commit()
+                except Exception:
+                    db.rollback()
                 continue
 
             if parsed is None:
                 meta.parse_status = "unmatched"
                 meta.parse_error = "No parser matched"
                 summary["unmatched"] += 1
-                db.commit()
+                try:
+                    db.commit()
+                except Exception:
+                    db.rollback()
                 continue
 
             # Apply user-defined category rules — overrides parser's category if matched
-            user_cat = apply_user_rules(db, user_id, parsed.merchant or "", parsed.description)
+            try:
+                user_cat = apply_user_rules(db, user_id, parsed.merchant or "", parsed.description)
+            except Exception:
+                db.rollback()
+                user_cat = None
             if user_cat:
                 parsed.category = user_cat
 
             # Save transaction — skip if duplicate email_message_id
-            existing_tx = db.query(Transaction).filter(
-                Transaction.email_message_id == gmail_id
-            ).first()
-            if not existing_tx:
-                tx = Transaction(
-                    user_id=user_id,
-                    transaction_date=parsed.transaction_date,
-                    amount=parsed.amount,
-                    description=parsed.description,
-                    merchant=parsed.merchant,
-                    category=parsed.category,
-                    payment_method=parsed.payment_method,
-                    payment_source=parsed.payment_source,
-                    notes=f"Ref: {parsed.reference_number}" if parsed.reference_number else None,
-                    source="email",
-                    email_message_id=gmail_id,
-                )
-                db.add(tx)
-                summary["transactions_created"] += 1
+            try:
+                existing_tx = db.query(Transaction).filter(
+                    Transaction.email_message_id == gmail_id
+                ).first()
+                if not existing_tx:
+                    tx = Transaction(
+                        user_id=user_id,
+                        transaction_date=parsed.transaction_date,
+                        amount=parsed.amount,
+                        description=parsed.description,
+                        merchant=parsed.merchant,
+                        category=parsed.category,
+                        payment_method=parsed.payment_method,
+                        payment_source=parsed.payment_source,
+                        notes=f"Ref: {parsed.reference_number}" if parsed.reference_number else None,
+                        source="email",
+                        email_message_id=gmail_id,
+                    )
+                    db.add(tx)
+                    summary["transactions_created"] += 1
 
-                # Auto-persist merchant→category rule so future imports stay
-                # categorised even if the parser's heuristic changes.
-                if parsed.merchant:
-                    upsert_rule_if_absent(db, user_id, parsed.merchant, parsed.category)
+                    # Auto-persist merchant→category rule so future imports stay
+                    # categorised even if the parser's heuristic changes.
+                    if parsed.merchant:
+                        upsert_rule_if_absent(db, user_id, parsed.merchant, parsed.category)
 
-            meta.parse_status = "success"
-            meta.bank_name = parsed.bank_name
-            summary["parsed_ok"] += 1
-            db.commit()
+                meta.parse_status = "success"
+                meta.bank_name = parsed.bank_name
+                summary["parsed_ok"] += 1
+                db.commit()
+            except Exception as e:
+                db.rollback()
+                meta.parse_status = "failed"
+                meta.parse_error = str(e)[:500]
+                summary["parse_failed"] += 1
+                try:
+                    db.commit()
+                except Exception:
+                    db.rollback()
 
         # Phase 7 D-19: post-sync detection hook (insights/anomalies/subscriptions)
         try:
@@ -148,6 +169,7 @@ class EmailSyncService:
             # never break sync because of insights
             import logging
             logging.getLogger(__name__).error(f"post-sync insights hook failed: {e}")
+            db.rollback()
 
         return summary
 
