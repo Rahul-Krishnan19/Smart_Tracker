@@ -40,6 +40,9 @@ google-api-python-client==2.155.0
 # Scheduler (Phase 4: automated email sync)
 apscheduler==3.11.2
 
+# Gemini LLM (AI email parser fallback, categorization fallback, merchant normalization)
+google-generativeai==0.8.6
+
 # --- Phase 4: File upload processing (install when adding CSV/Excel import) ---
 # pandas>=2.2
 # openpyxl==3.1.5

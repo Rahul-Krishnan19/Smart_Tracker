@@ -8,11 +8,14 @@ from app.parsers.base_parser import BaseEmailParser, ParsedTransaction
 from app.parsers.hdfc_parser import HDFCParser
 from app.parsers.icici_parser import ICICIParser
 from app.parsers.sbi_parser import SBIParser
+from app.agents.llm_parser import LLMEmailParser
 
 PARSERS: list[BaseEmailParser] = [
     HDFCParser(),
     ICICIParser(),
     SBIParser(),
+    # Catch-all LLM fallback — MUST stay last so bank-specific parsers win first.
+    LLMEmailParser(),
 ]
 
 

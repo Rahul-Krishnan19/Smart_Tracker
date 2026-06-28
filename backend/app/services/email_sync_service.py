@@ -171,6 +171,15 @@ class EmailSyncService:
             logging.getLogger(__name__).error(f"post-sync insights hook failed: {e}")
             db.rollback()
 
+        # Agent 3: normalize merchant name variants after new transactions land.
+        try:
+            from app.agents.merchant_normalizer import normalize_merchants
+            normalize_merchants(db, user_id)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"post-sync merchant normalization failed: {e}")
+            db.rollback()
+
         return summary
 
 

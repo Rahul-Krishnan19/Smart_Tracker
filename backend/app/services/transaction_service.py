@@ -12,6 +12,7 @@ from sqlalchemy import or_, func
 from fastapi import HTTPException
 
 from app.models.transaction import Transaction
+from app.models.merchant_canonical import MerchantCanonicalMap
 from app.schemas.transaction import TransactionCreate, TransactionUpdate, TransactionFilters
 
 
@@ -168,14 +169,25 @@ class TransactionService:
             .scalar()
         ) or Decimal("0")
 
+        # Roll variant merchant names up under their canonical name when a
+        # mapping exists (Agent 3); fall back to the raw merchant otherwise.
+        canonical = func.coalesce(
+            MerchantCanonicalMap.canonical_merchant, Transaction.merchant
+        ).label("merchant")
+
         rows = (
-            base.with_entities(
-                Transaction.merchant,
+            base.outerjoin(
+                MerchantCanonicalMap,
+                (MerchantCanonicalMap.user_id == Transaction.user_id)
+                & (MerchantCanonicalMap.raw_merchant == Transaction.merchant),
+            )
+            .with_entities(
+                canonical,
                 func.sum(Transaction.amount).label("total"),
                 func.count(Transaction.id).label("count"),
                 func.avg(Transaction.amount).label("avg"),
             )
-            .group_by(Transaction.merchant)
+            .group_by(canonical)
             .order_by(func.sum(Transaction.amount).desc())
             .limit(limit)
             .all()
