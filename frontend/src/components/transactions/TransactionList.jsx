@@ -4,18 +4,24 @@ import TransactionForm from './TransactionForm'
 import { transactionsApi } from '../../services/api'
 
 const CATEGORY_COLORS = {
-  'Food & Dining': '#f97316',
-  'Transport': '#0ea5e9',
-  'Groceries': '#10b981',
-  'Shopping': '#8b5cf6',
-  'Entertainment': '#ec4899',
-  'Healthcare': '#f43f5e',
-  'Subscriptions': '#6366f1',
-  'Utilities': '#f59e0b',
-  'Rent': '#14b8a6',
-  'Travel': '#06b6d4',
-  'Electricity': '#f59e0b',
-  'Others': '#94a3b8',
+  'Food & Dining':     '#f97316',
+  'Groceries':         '#10b981',
+  'Travel':            '#06b6d4',
+  'Entertainment':     '#ec4899',
+  'Shopping':          '#8b5cf6',
+  'Utilities':         '#f59e0b',
+  'Fuel':              '#ef4444',
+  'Healthcare':        '#f43f5e',
+  'Education':         '#60a5fa',
+  'Insurance':         '#a78bfa',
+  'Investments':       '#34d399',
+  'Financial Services':'#fb923c',
+  'Subscriptions':     '#6366f1',
+  'Transfers':         '#94a3b8',
+  'Rent':              '#14b8a6',
+  'Salary':            '#4ade80',
+  'Cashback & Rewards':'#fbbf24',
+  'Others':            '#94a3b8',
 }
 
 function categoryColor(cat) {
@@ -31,7 +37,12 @@ const PAYMENT_ICONS = {
   'Others': '💰',
 }
 
-const CATEGORIES = ['Rent', 'Groceries', 'Shopping', 'Electricity', 'Food & Dining', 'Transport', 'Entertainment', 'Healthcare', 'Subscriptions', 'Utilities', 'Travel', 'Others']
+const CATEGORIES = [
+  'Food & Dining', 'Groceries', 'Travel', 'Entertainment', 'Shopping',
+  'Utilities', 'Fuel', 'Healthcare', 'Education', 'Insurance',
+  'Investments', 'Financial Services', 'Subscriptions', 'Transfers',
+  'Rent', 'Salary', 'Cashback & Rewards', 'Others',
+]
 
 function formatAmount(amount) {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount)
@@ -149,7 +160,7 @@ export default function TransactionList({ transactions, onRefresh, loading, onBu
           <select
             value={bulkCategory}
             onChange={e => setBulkCategory(e.target.value)}
-            className="input-field text-sm py-1 w-40"
+            className="input-field text-sm py-1 flex-1 min-w-0 max-w-[180px]"
           >
             <option value="">Set category...</option>
             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -170,120 +181,149 @@ export default function TransactionList({ transactions, onRefresh, loading, onBu
         </div>
       )}
 
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-slate-100 bg-slate-50/60">
-            <th className="px-4 py-3 w-8">
-              <input
-                type="checkbox"
-                checked={transactions.length > 0 && selectedIds.size === transactions.length}
-                onChange={toggleSelectAll}
-                className="rounded border-slate-300 accent-emerald-500"
-              />
-            </th>
-            <th className="text-left section-label px-4 py-3">Date</th>
-            <th className="text-left section-label px-4 py-3">Description</th>
-            <th className="text-left section-label px-4 py-3">Category</th>
-            <th className="text-left section-label px-4 py-3">Method</th>
-            <th className="text-right section-label px-4 py-3">Amount</th>
-            <th className="text-right section-label px-4 py-3">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-50">
-          {transactions.map((tx) => (
-            editingId === tx.id ? (
-              <tr key={tx.id}>
-                <td colSpan={7} className="px-4 py-4 bg-emerald-50/50">
-                  <TransactionForm
-                    initialValues={{
-                      transaction_date: tx.transaction_date,
-                      amount: String(tx.amount),
-                      description: tx.description,
-                      merchant: tx.merchant ?? '',
-                      category: tx.category,
-                      payment_method: tx.payment_method,
-                      notes: tx.notes ?? '',
-                    }}
-                    onSubmit={(data) => handleUpdate(tx.id, data)}
-                    onCancel={() => setEditingId(null)}
-                    loading={editLoading}
-                  />
-                </td>
-              </tr>
-            ) : (
-              <tr key={tx.id} className="hover:bg-slate-50/80 transition-colors">
-                <td className="px-4 py-3">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.has(tx.id)}
-                    onChange={() => toggleSelect(tx.id)}
-                    className="rounded border-slate-300 accent-emerald-500"
-                  />
-                </td>
-                <td className="px-4 py-3 text-sm text-slate-500 whitespace-nowrap" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
-                  {format(new Date(tx.transaction_date), 'dd MMM yyyy')}
-                </td>
-                <td className="px-4 py-3 max-w-xs">
-                  <div className="text-sm font-semibold text-slate-900 truncate">{tx.description}</div>
-                  {tx.merchant && <div className="text-xs text-slate-400 truncate">{tx.merchant}</div>}
-                  {tx.payment_source && <div className="text-xs text-slate-400 truncate">{tx.payment_source}</div>}
-                  {tx.notes && <div className="text-xs text-slate-400 italic truncate">{tx.notes}</div>}
-                </td>
-                <td className="px-4 py-3">
-                  {categoryEdit?.txId === tx.id ? (
-                    <div className="flex flex-col gap-1">
-                      <select
-                        value={categoryEdit.value}
-                        onChange={e => setCategoryEdit({ ...categoryEdit, value: e.target.value })}
-                        className="input-field text-xs py-0.5"
-                      >
-                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                      <div className="flex gap-1">
-                        <button onClick={() => saveCategoryEdit(tx)} disabled={categoryEditLoading} className="text-xs text-emerald-600 hover:text-emerald-800 font-medium">Save</button>
-                        <button onClick={() => setCategoryEdit(null)} className="text-xs text-slate-500 hover:text-slate-700">Cancel</button>
+      {/* Mobile card list — replaces table on small screens */}
+      <div className="md:hidden divide-y divide-slate-100">
+        {transactions.map((tx) => (
+          <div key={tx.id} className="flex items-center gap-3 px-4 py-3">
+            <div
+              className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white text-sm font-bold"
+              style={{ backgroundColor: categoryColor(tx.category) }}
+            >
+              {tx.category?.[0] || '?'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-900 truncate">{tx.merchant || tx.description}</p>
+              <p className="text-xs text-slate-400 truncate">{tx.category} · {format(new Date(tx.transaction_date), 'dd MMM yyyy')}</p>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <p className={`mono-amount text-sm ${tx.amount < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                {tx.amount < 0 ? '-' : ''}{formatAmount(Math.abs(tx.amount))}
+              </p>
+              <p className="text-xs text-slate-400">{tx.payment_method}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-slate-100 bg-slate-50/60">
+              <th className="px-4 py-3 w-8">
+                <input
+                  type="checkbox"
+                  checked={transactions.length > 0 && selectedIds.size === transactions.length}
+                  onChange={toggleSelectAll}
+                  className="rounded border-slate-300 accent-emerald-500"
+                />
+              </th>
+              <th className="text-left section-label px-4 py-3">Date</th>
+              <th className="text-left section-label px-4 py-3">Description</th>
+              <th className="text-left section-label px-4 py-3">Category</th>
+              <th className="text-left section-label px-4 py-3">Method</th>
+              <th className="text-right section-label px-4 py-3">Amount</th>
+              <th className="text-right section-label px-4 py-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-50">
+            {transactions.map((tx) => (
+              editingId === tx.id ? (
+                <tr key={tx.id}>
+                  <td colSpan={7} className="px-4 py-4 bg-emerald-50/50">
+                    <TransactionForm
+                      initialValues={{
+                        transaction_date: tx.transaction_date,
+                        amount: String(tx.amount),
+                        description: tx.description,
+                        merchant: tx.merchant ?? '',
+                        category: tx.category,
+                        payment_method: tx.payment_method,
+                        notes: tx.notes ?? '',
+                      }}
+                      onSubmit={(data) => handleUpdate(tx.id, data)}
+                      onCancel={() => setEditingId(null)}
+                      loading={editLoading}
+                    />
+                  </td>
+                </tr>
+              ) : (
+                <tr key={tx.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(tx.id)}
+                      onChange={() => toggleSelect(tx.id)}
+                      className="rounded border-slate-300 accent-emerald-500"
+                    />
+                  </td>
+                  <td className="px-4 py-3 text-sm text-slate-500 whitespace-nowrap" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
+                    {format(new Date(tx.transaction_date), 'dd MMM yyyy')}
+                  </td>
+                  <td className="px-4 py-3 max-w-xs">
+                    <div className="text-sm font-semibold text-slate-900 truncate">{tx.description}</div>
+                    {tx.merchant && <div className="text-xs text-slate-400 truncate">{tx.merchant}</div>}
+                    {tx.payment_source && <div className="text-xs text-slate-400 truncate">{tx.payment_source}</div>}
+                    {tx.notes && <div className="text-xs text-slate-400 italic truncate">{tx.notes}</div>}
+                  </td>
+                  <td className="px-4 py-3">
+                    {categoryEdit?.txId === tx.id ? (
+                      <div className="flex flex-col gap-1">
+                        <select
+                          value={categoryEdit.value}
+                          onChange={e => setCategoryEdit({ ...categoryEdit, value: e.target.value })}
+                          className="input-field text-xs py-0.5"
+                        >
+                          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                        <div className="flex gap-1">
+                          <button onClick={() => saveCategoryEdit(tx)} disabled={categoryEditLoading} className="text-xs text-emerald-600 hover:text-emerald-800 font-medium">Save</button>
+                          <button onClick={() => setCategoryEdit(null)} className="text-xs text-slate-500 hover:text-slate-700">Cancel</button>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <span
-                      className="badge cursor-pointer gap-1.5"
-                      style={{ backgroundColor: `${categoryColor(tx.category)}1a`, color: categoryColor(tx.category) }}
-                      onClick={() => setCategoryEdit({ txId: tx.id, value: tx.category })}
-                      title="Click to re-categorize"
-                    >
-                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: categoryColor(tx.category) }} />
-                      {tx.category}
+                    ) : (
+                      <span
+                        className="badge cursor-pointer gap-1.5"
+                        style={{ backgroundColor: `${categoryColor(tx.category)}1a`, color: categoryColor(tx.category) }}
+                        onClick={() => setCategoryEdit({ txId: tx.id, value: tx.category })}
+                        title="Click to re-categorize"
+                      >
+                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: categoryColor(tx.category) }} />
+                        {tx.category}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-slate-500">
+                    <span title={tx.payment_method}>
+                      {PAYMENT_ICONS[tx.payment_method] ?? '💰'} {tx.payment_method}
                     </span>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-sm text-slate-500">
-                  <span title={tx.payment_method}>
-                    {PAYMENT_ICONS[tx.payment_method] ?? '💰'} {tx.payment_method}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
-                  <span className="mono-amount text-sm text-slate-900">{formatAmount(tx.amount)}</span>
-                </td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
-                  <button
-                    onClick={() => setEditingId(tx.id)}
-                    className="text-emerald-600 hover:text-emerald-800 text-sm mr-3 font-medium"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(tx.id)}
-                    disabled={deleteId === tx.id}
-                    className="text-red-500 hover:text-red-700 text-sm font-medium disabled:opacity-50"
-                  >
-                    {deleteId === tx.id ? '...' : 'Delete'}
-                  </button>
-                </td>
-              </tr>
-            )
-          ))}
-        </tbody>
-      </table>
+                  </td>
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <span className={`mono-amount text-sm ${tx.amount < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                      {tx.amount < 0 ? '-' : ''}{formatAmount(Math.abs(tx.amount))}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <button
+                      onClick={() => setEditingId(tx.id)}
+                      className="text-emerald-600 hover:text-emerald-800 text-sm mr-3 font-medium p-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(tx.id)}
+                      disabled={deleteId === tx.id}
+                      className="text-red-500 hover:text-red-700 text-sm font-medium disabled:opacity-50 p-2"
+                    >
+                      {deleteId === tx.id ? '...' : 'Delete'}
+                    </button>
+                  </td>
+                </tr>
+              )
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

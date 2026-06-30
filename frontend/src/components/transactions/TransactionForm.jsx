@@ -7,7 +7,12 @@ import { transactionsApi } from '../../services/api'
 
 // System categories — used as the initial seed for the combobox suggestions
 // until the API responds with the user's full set (system + custom).
-const DEFAULT_CATEGORIES = ['Rent', 'Groceries', 'Shopping', 'Electricity', 'Food & Dining', 'Transport', 'Entertainment', 'Healthcare', 'Subscriptions', 'Utilities', 'Travel', 'Others']
+const DEFAULT_CATEGORIES = [
+  'Food & Dining', 'Groceries', 'Travel', 'Entertainment', 'Shopping',
+  'Utilities', 'Fuel', 'Healthcare', 'Education', 'Insurance',
+  'Investments', 'Financial Services', 'Subscriptions', 'Transfers',
+  'Rent', 'Salary', 'Cashback & Rewards', 'Others',
+]
 const PAYMENT_METHODS = ['Credit Card', 'UPI', 'Cash', 'Debit Card', 'Net Banking', 'Others']
 
 const schema = z.object({

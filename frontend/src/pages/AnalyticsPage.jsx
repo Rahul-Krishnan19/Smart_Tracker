@@ -1,313 +1,267 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { transactionsApi, analyticsApi } from '../services/api'
-import {
-  PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
-} from 'recharts'
-import TrendChart from '../components/analytics/TrendChart'
-import GranularityToggle from '../components/analytics/GranularityToggle'
-import FilterPanel from '../components/transactions/FilterPanel'
-import { useFilters } from '../context/FiltersContext'
+import CalendarModal from '../components/ui/CalendarModal'
 
 const CATEGORY_COLORS = {
-  'Food & Dining': '#f97316',
-  'Transport': '#0ea5e9',
-  'Groceries': '#10b981',
-  'Shopping': '#8b5cf6',
-  'Entertainment': '#ec4899',
-  'Healthcare': '#f43f5e',
-  'Subscriptions': '#6366f1',
-  'Utilities': '#f59e0b',
-  'Rent': '#14b8a6',
-  'Travel': '#06b6d4',
-  'Others': '#94a3b8',
+  'Food & Dining':     '#FF8A3D',
+  'Groceries':         '#16B88A',
+  'Travel':            '#34D399',
+  'Entertainment':     '#EC4899',
+  'Shopping':          '#7C5CFF',
+  'Utilities':         '#F4B740',
+  'Fuel':              '#F97316',
+  'Healthcare':        '#22D3EE',
+  'Education':         '#60A5FA',
+  'Insurance':         '#A78BFA',
+  'Investments':       '#4ADE80',
+  'Financial Services':'#FB923C',
+  'Subscriptions':     '#6366f1',
+  'Transfers':         '#94A3B8',
+  'Rent':              '#14b8a6',
+  'Salary':            '#4ADE80',
+  'Cashback & Rewards':'#FBBF24',
+  'Others':            '#8B95A1',
 }
-const COLORS = ['#f97316', '#0ea5e9', '#10b981', '#8b5cf6', '#ec4899', '#f43f5e', '#6366f1', '#f59e0b', '#14b8a6', '#06b6d4', '#94a3b8']
 
-function getCategoryColor(cat, idx) {
-  return CATEGORY_COLORS[cat] || COLORS[idx % COLORS.length]
+const METHOD_COLORS = {
+  'UPI': '#16B88A',
+  'Credit Card': '#7C5CFF',
+  'Debit Card': '#3B82F6',
+  'Net Banking': '#F4B740',
+  'Cash': '#8B95A1',
+}
+
+const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+
+function todayISO() {
+  const d = new Date(); const pad = n => n<10?'0'+n:''+n
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())
+}
+function daysAgoISO(n) {
+  const d = new Date(); d.setDate(d.getDate()-n); const pad = x => x<10?'0'+x:''+x
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())
+}
+function fromISO(s) { const p=s.split('-'); return new Date(+p[0],+p[1]-1,+p[2]) }
+
+function rangeLabel(start, end) {
+  const t = todayISO()
+  if (end === t) {
+    for (const n of [7,30,90]) { if (start === daysAgoISO(n-1)) return 'Last '+n+' days' }
+    const d = new Date(); d.setDate(1); const pad=x=>x<10?'0'+x:''+x
+    const fom = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-01'
+    if (start === fom) return 'This month'
+  }
+  const a = fromISO(start), b = fromISO(end)
+  return a.getDate()+' '+MO[a.getMonth()]+' – '+b.getDate()+' '+MO[b.getMonth()]
 }
 
 function formatINR(v) {
-  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v)
+  return new Intl.NumberFormat('en-IN', { style:'currency', currency:'INR', maximumFractionDigits:0 }).format(v)
 }
 
-// Build a clean params object for API calls — only include non-empty values.
-function buildParams(filters, extras = {}) {
-  const params = { ...extras }
-  for (const [k, v] of Object.entries(filters)) {
-    if (v !== '' && v !== null && v !== undefined) params[k] = v
-  }
-  return params
+function AnimatedDonut({ segments, total, size = 190, strokeWidth = 26, centerContent }) {
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  let cumulative = 0
+
+  return (
+    <div style={{ position:'relative', width:size, height:size, margin:'0 auto 18px' }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform:'rotate(-90deg)' }}>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="transparent"
+          stroke="#1B212B"
+          strokeWidth={strokeWidth}
+        />
+        <AnimatePresence>
+          {segments.map((seg, i) => {
+            if (!seg.amount) return null
+            const pct = total ? seg.amount / total : 0
+            const dash = pct * circumference
+            const offset = (cumulative / total || 0) * circumference
+            cumulative += seg.amount
+            return (
+              <motion.circle
+                key={seg.name}
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                fill="transparent"
+                stroke={seg.color}
+                strokeWidth={strokeWidth}
+                strokeDasharray={`${dash} ${circumference}`}
+                strokeLinecap="butt"
+                initial={{ strokeDashoffset: circumference, opacity: 0 }}
+                animate={{ strokeDashoffset: -offset, opacity: 1 }}
+                transition={{
+                  strokeDashoffset: { duration: 0.9, delay: i * 0.08, ease: 'easeOut' },
+                  opacity: { duration: 0.3, delay: i * 0.08 },
+                }}
+              />
+            )
+          })}
+        </AnimatePresence>
+      </svg>
+      <div style={{ position:'absolute', inset:strokeWidth + 4, borderRadius:'50%', background:'#141921', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+        {centerContent}
+      </div>
+    </div>
+  )
 }
 
 export default function AnalyticsPage() {
-  const { analyticsFilters, setAnalyticsFilters } = useFilters()
+  const [dateStart, setDateStart] = useState(daysAgoISO(29))
+  const [dateEnd, setDateEnd] = useState(todayISO())
+  const [showCal, setShowCal] = useState(false)
+  const [dim, setDim] = useState('category')
   const [summary, setSummary] = useState(null)
+  const [trendData, setTrendData] = useState([])
   const [loading, setLoading] = useState(false)
-  const [merchantData, setMerchantData] = useState(null)
-  const [granularity, setGranularity] = useState('monthly')
-  const [trendData, setTrendData] = useState(null)
-  const [pctChange, setPctChange] = useState(null)
-  const [previousTotal, setPreviousTotal] = useState(0)
-  const [categoryOverlay, setCategoryOverlay] = useState(false)
 
-  async function fetchSummary(filters = analyticsFilters) {
+  const fetchAll = useCallback(async (start, end) => {
     setLoading(true)
     try {
-      const res = await transactionsApi.summary(buildParams(filters))
-      setSummary(res.data)
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function fetchMerchantBreakdown(filters = analyticsFilters) {
-    try {
-      const res = await transactionsApi.merchantBreakdown(buildParams(filters))
-      setMerchantData(res.data)
-    } catch {
-      // ignore
-    }
-  }
-
-  async function fetchTrend(currentGranularity = granularity, filters = analyticsFilters) {
-    try {
-      const res = await analyticsApi.trend(buildParams(filters, { granularity: currentGranularity }))
-      setTrendData(res.data.trend)
-      setPctChange(res.data.pct_change)
-      setPreviousTotal(res.data.previous_total)
-    } catch {
-      setTrendData([])
-      setPctChange(null)
-      setPreviousTotal(0)
-    }
-  }
-
-  function handleApply(newFilters) {
-    setAnalyticsFilters(newFilters)
-    fetchSummary(newFilters)
-    fetchMerchantBreakdown(newFilters)
-    fetchTrend(granularity, newFilters)
-  }
-
-  useEffect(() => {
-    fetchSummary()
-    fetchMerchantBreakdown()
-    fetchTrend()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      const [sumRes, trendRes] = await Promise.all([
+        transactionsApi.summary({ date_from: start, date_to: end }),
+        analyticsApi.trend({ date_from: start, date_to: end, granularity: 'weekly' }).catch(() => ({ data: { trend: [] } })),
+      ])
+      setSummary(sumRes.data)
+      setTrendData(trendRes.data.trend || [])
+    } catch { /* ignore */ }
+    finally { setLoading(false) }
   }, [])
 
-  useEffect(() => {
-    fetchTrend(granularity)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [granularity])
+  useEffect(() => { fetchAll(dateStart, dateEnd) }, [dateStart, dateEnd, fetchAll])
+
+  function applyRange(start, end) {
+    setDateStart(start); setDateEnd(end); setShowCal(false)
+  }
+
+  // Build breakdown
+  const breakdown = summary
+    ? (dim === 'category' ? summary.category_breakdown || [] : summary.payment_breakdown || [])
+        .map(row => ({
+          name: dim === 'category' ? row.category : row.payment_method,
+          amount: row.total,
+          color: dim === 'category' ? (CATEGORY_COLORS[row.category] || '#8B95A1') : (METHOD_COLORS[row.payment_method] || '#8B95A1'),
+        }))
+        .sort((a, b) => b.amount - a.amount)
+    : []
+
+  const btot = breakdown.reduce((a, c) => a + c.amount, 0)
+  const breakdownWithPct = breakdown.map(o => ({
+    ...o,
+    pct: btot ? ((o.amount / btot) * 100).toFixed(1) + '%' : '0%',
+    pctNum: btot ? (o.amount / btot) * 100 : 0,
+  }))
+
+  // Trend bars
+  const maxV = Math.max(1, ...trendData.map(b => b.amount || b.total || 0))
+  const bars = trendData.slice(-8).map(b => {
+    const v = b.amount || b.total || 0
+    const labelRaw = b.period || b.date || ''
+    let label = labelRaw
+    if (labelRaw.length === 7) { const p = labelRaw.split('-'); label = MO[parseInt(p[1])-1] }
+    else if (labelRaw.length === 10) { const d = fromISO(labelRaw); label = d.getDate()+' '+MO[d.getMonth()] }
+    return { label, value: v, height: Math.max(3, v / maxV * 100) }
+  })
+
+  const segSel = { padding:'7px 13px', borderRadius:9, fontSize:12.5, fontWeight:700, cursor:'pointer', background:'#16B88A', color:'#06231B', border:'none', fontFamily:'inherit' }
+  const segUn = { padding:'7px 13px', borderRadius:9, fontSize:12.5, fontWeight:600, cursor:'pointer', background:'transparent', color:'#8B95A1', border:'none', fontFamily:'inherit' }
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Syne, sans-serif' }}>Analytics</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Understand where your money goes</p>
+    <div style={{ padding:'18px 16px 0' }}>
+      {/* Header */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
+        <div style={{ fontSize:20, fontWeight:800, color:'#EAEEF2' }}>Reports</div>
+        <button onClick={() => setShowCal(true)} style={{ width:40, height:40, borderRadius:12, background:'#141921', border:'1px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#16B88A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/></svg>
+        </button>
       </div>
 
-      {/* Full filter panel — same component used on the Transactions page.
-          Filter state lives in FiltersContext so it persists across tab switches. */}
-      <FilterPanel onFilter={handleApply} loading={loading} defaultValues={analyticsFilters} />
+      {/* Range pill */}
+      <button onClick={() => setShowCal(true)} style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'8px 13px', borderRadius:999, background:'#141921', border:'1px solid rgba(255,255,255,0.08)', cursor:'pointer', marginBottom:16, fontFamily:'inherit' }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16B88A" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/></svg>
+        <span style={{ fontSize:13, fontWeight:700, color:'#EAEEF2' }}>{rangeLabel(dateStart, dateEnd)}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8B95A1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
 
-      {/* KPI Cards */}
-      {summary && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="card border-l-4 border-l-emerald-500">
-            <p className="section-label text-slate-400 mb-2">Total Spent</p>
-            <p className="stat-number text-2xl">{formatINR(summary.total_amount)}</p>
-            {pctChange != null && (
-              <span
-                className={`inline-flex items-center gap-1 text-xs font-medium mt-2 ${pctChange > 0 ? 'text-red-500' : 'text-emerald-500'}`}
-                title={`Previous period: ${formatINR(previousTotal)}`}
-              >
-                {pctChange > 0 ? '▲' : '▼'} {Math.abs(pctChange).toFixed(1)}% vs last period
-              </span>
-            )}
-          </div>
-          <div className="card border-l-4 border-l-sky-400">
-            <p className="section-label text-slate-400 mb-2">Transactions</p>
-            <p className="stat-number text-2xl">{summary.transaction_count}</p>
-          </div>
-          <div className="card border-l-4 border-l-violet-400">
-            <p className="section-label text-slate-400 mb-2">Avg per Transaction</p>
-            <p className="stat-number text-2xl">
-              {summary.transaction_count > 0 ? formatINR(summary.total_amount / summary.transaction_count) : '—'}
-            </p>
-          </div>
+      {/* Spending trend */}
+      <div style={{ background:'#141921', border:'1px solid rgba(255,255,255,0.06)', borderRadius:18, padding:'18px 16px' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ fontSize:14, fontWeight:700, color:'#EAEEF2' }}>Spending trend</div>
+          <div style={{ fontSize:12, color:'#8B95A1' }}>{rangeLabel(dateStart, dateEnd)}</div>
         </div>
-      )}
-
-      {/* Trend Chart */}
-      <div className="card">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-          <div>
-            <h2 className="text-base font-bold text-slate-900" style={{ fontFamily: 'Syne, sans-serif' }}>Spending Over Time</h2>
+        {bars.length > 0 ? (
+          <div style={{ display:'flex', alignItems:'flex-end', gap:7, height:152, marginTop:20 }}>
+            {bars.map((b, i) => (
+              <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:9, height:'100%', justifyContent:'flex-end', minWidth:0 }}>
+                <div style={{ width:'100%', display:'flex', alignItems:'flex-end', height:'100%' }}>
+                  <div style={{ width:'100%', borderRadius:'6px 6px 2px 2px', background:'linear-gradient(180deg,#16B88A,#0E7C66)', height:b.height+'%', transition:'height .4s ease' }} />
+                </div>
+                <div style={{ fontSize:10, color:'#5C6671', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:'100%' }}>{b.label}</div>
+              </div>
+            ))}
           </div>
-          <div className="flex items-center gap-3">
-            <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={categoryOverlay}
-                onChange={(e) => setCategoryOverlay(e.target.checked)}
-                className="accent-emerald-500 w-3.5 h-3.5"
-              />
-              Category overlay
-            </label>
-            <GranularityToggle value={granularity} onChange={setGranularity} />
+        ) : (
+          <div style={{ height:152, marginTop:20, display:'flex', alignItems:'center', justifyContent:'center', color:'#5C6671', fontSize:13 }}>
+            {loading ? 'Loading…' : 'No data'}
           </div>
-        </div>
-        <TrendChart data={trendData ?? []} categoryOverlay={categoryOverlay} />
+        )}
       </div>
 
-      {summary && (
-        <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Category Donut */}
-            {summary.category_breakdown.length > 0 && (
-              <div className="card">
-                <h2 className="text-base font-bold text-slate-900 mb-5" style={{ fontFamily: 'Syne, sans-serif' }}>Spending by Category</h2>
-                <ResponsiveContainer width="100%" height={280}>
-                  <PieChart>
-                    <Pie
-                      data={summary.category_breakdown}
-                      dataKey="total"
-                      nameKey="category"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={70}
-                      outerRadius={110}
-                      paddingAngle={2}
-                    >
-                      {summary.category_breakdown.map((entry, i) => (
-                        <Cell key={i} fill={getCategoryColor(entry.category, i)} strokeWidth={0} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(v) => formatINR(v)} contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontFamily: 'IBM Plex Mono' }} />
-                    <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ fontFamily: 'DM Sans', fontSize: 12, color: '#64748b' }}>{value}</span>} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            )}
+      {/* Breakdown section */}
+      <div style={{ marginTop:18, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <div style={{ fontSize:15, fontWeight:700, color:'#EAEEF2' }}>Breakdown</div>
+        <div style={{ display:'flex', background:'#10151C', border:'1px solid rgba(255,255,255,0.07)', borderRadius:11, padding:3, gap:2 }}>
+          <button onClick={() => setDim('category')} style={dim === 'category' ? segSel : segUn}>Category</button>
+          <button onClick={() => setDim('payment')} style={dim === 'payment' ? segSel : segUn}>Payment</button>
+        </div>
+      </div>
 
-            {/* Payment Method Bar */}
-            {summary.payment_breakdown.length > 0 && (
-              <div className="card">
-                <h2 className="text-base font-bold text-slate-900 mb-5" style={{ fontFamily: 'Syne, sans-serif' }}>By Payment Method</h2>
-                <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={summary.payment_breakdown} layout="vertical" margin={{ left: 0, right: 16 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                    <XAxis type="number" tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11, fill: '#94a3b8', fontFamily: 'IBM Plex Mono' }} axisLine={false} tickLine={false} />
-                    <YAxis type="category" dataKey="payment_method" width={96} tick={{ fontSize: 12, fill: '#64748b', fontFamily: 'DM Sans' }} axisLine={false} tickLine={false} />
-                    <Tooltip formatter={(v) => formatINR(v)} contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontFamily: 'IBM Plex Mono' }} />
-                    <Bar dataKey="total" name="Amount" fill="#10b981" radius={[0, 6, 6, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
+      <div style={{ marginTop:12, background:'#141921', border:'1px solid rgba(255,255,255,0.06)', borderRadius:18, padding:'22px 16px 18px' }}>
+        {/* Donut */}
+        <AnimatedDonut
+          key={dim + dateStart + dateEnd}
+          segments={breakdownWithPct}
+          total={btot}
+          centerContent={
+            <>
+              <div style={{ fontSize:10.5, color:'#8B95A1', textTransform:'uppercase', letterSpacing:'0.06em' }}>Total</div>
+              <div style={{ fontSize:23, fontWeight:800, color:'#EAEEF2', marginTop:3, fontVariantNumeric:'tabular-nums' }}>{formatINR(btot)}</div>
+            </>
+          }
+        />
+
+        {/* Legend */}
+        {breakdownWithPct.length === 0 && (
+          <div style={{ textAlign:'center', padding:'14px 0', color:'#5C6671', fontSize:13 }}>No data for this period</div>
+        )}
+        {breakdownWithPct.map(o => (
+          <div key={o.name} style={{ marginTop:15 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:7 }}>
+              <div style={{ width:10, height:10, borderRadius:3, flexShrink:0, background:o.color }} />
+              <div style={{ flex:1, fontSize:13.5, color:'#EAEEF2', fontWeight:600, minWidth:0, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{o.name}</div>
+              <div style={{ fontSize:13, color:'#EAEEF2', fontWeight:700, fontVariantNumeric:'tabular-nums' }}>{formatINR(o.amount)}</div>
+              <div style={{ fontSize:11, color:'#8B95A1', width:44, textAlign:'right' }}>{o.pct}</div>
+            </div>
+            <div style={{ height:6, borderRadius:999, background:'#1B212B', overflow:'hidden' }}>
+              <div style={{ height:'100%', borderRadius:999, background:o.color, width:Math.max(2, o.pctNum)+'%' }} />
+            </div>
           </div>
+        ))}
+      </div>
 
-          {/* Category breakdown table */}
-          {summary.category_breakdown.length > 0 && (
-            <div className="card">
-              <h2 className="text-base font-bold text-slate-900 mb-5" style={{ fontFamily: 'Syne, sans-serif' }}>Category Breakdown</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="text-left section-label py-2 font-semibold">Category</th>
-                      <th className="text-right section-label py-2 font-semibold">Txns</th>
-                      <th className="text-right section-label py-2 font-semibold">Amount</th>
-                      <th className="text-right section-label py-2 font-semibold hidden sm:table-cell">Share</th>
-                      <th className="hidden sm:table-cell py-2 w-32"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {summary.category_breakdown
-                      .sort((a, b) => b.total - a.total)
-                      .map((row, i) => {
-                        const color = getCategoryColor(row.category, i)
-                        const pct = summary.total_amount > 0 ? (row.total / summary.total_amount) * 100 : 0
-                        return (
-                          <tr key={row.category} className="hover:bg-slate-50/80 transition-colors">
-                            <td className="py-3 flex items-center gap-2.5">
-                              <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color }} />
-                              <span className="font-medium text-slate-800">{row.category}</span>
-                            </td>
-                            <td className="py-3 text-right text-slate-500">{row.count}</td>
-                            <td className="py-3 text-right mono-amount text-slate-900">{formatINR(row.total)}</td>
-                            <td className="py-3 text-right text-slate-400 hidden sm:table-cell">{pct.toFixed(1)}%</td>
-                            <td className="py-3 hidden sm:table-cell">
-                              <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                                <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Merchant table */}
-          {merchantData && merchantData.merchants.length > 0 && (
-            <div className="card" id="merchant-breakdown">
-              <h2 className="text-base font-bold text-slate-900 mb-5" style={{ fontFamily: 'Syne, sans-serif' }}>Top Merchants by Spend</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="text-left section-label py-2 font-semibold w-8">#</th>
-                      <th className="text-left section-label py-2 font-semibold">Merchant</th>
-                      <th className="text-right section-label py-2 font-semibold">Total</th>
-                      <th className="text-right section-label py-2 font-semibold hidden sm:table-cell">Txns</th>
-                      <th className="text-right section-label py-2 font-semibold hidden md:table-cell">Avg</th>
-                      <th className="text-right section-label py-2 font-semibold hidden md:table-cell">%</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {merchantData.merchants.map((row, i) => (
-                      <tr key={row.merchant} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3">
-                          <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center" style={{ fontFamily: 'IBM Plex Mono' }}>
-                            {i + 1}
-                          </span>
-                        </td>
-                        <td className="py-3 font-semibold text-slate-900">{row.merchant}</td>
-                        <td className="py-3 text-right mono-amount text-slate-900">{formatINR(row.total)}</td>
-                        <td className="py-3 text-right text-slate-500 hidden sm:table-cell">{row.count}</td>
-                        <td className="py-3 text-right text-slate-400 mono-amount hidden md:table-cell">{formatINR(row.avg)}</td>
-                        <td className="py-3 text-right text-slate-400 hidden md:table-cell">{row.pct_of_total.toFixed(1)}%</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {merchantData && merchantData.merchants.length === 0 && summary && summary.transaction_count > 0 && (
-            <div className="card text-center text-slate-400 py-8 text-sm">
-              No merchant data for the selected period.
-            </div>
-          )}
-
-          {summary.category_breakdown.length === 0 && (
-            <div className="card text-center text-slate-400 py-16">
-              <p className="text-lg mb-1">No data yet</p>
-              <p className="text-sm">No transactions found for the selected period.</p>
-            </div>
-          )}
-        </>
+      {showCal && (
+        <CalendarModal
+          start={dateStart}
+          end={dateEnd}
+          onApply={applyRange}
+          onClose={() => setShowCal(false)}
+        />
       )}
     </div>
   )

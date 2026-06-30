@@ -3,7 +3,12 @@ import { useForm } from 'react-hook-form'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths, startOfYear, format } from 'date-fns'
 import { transactionsApi } from '../../services/api'
 
-const DEFAULT_CATEGORIES = ['Rent', 'Groceries', 'Shopping', 'Electricity', 'Food & Dining', 'Transport', 'Entertainment', 'Healthcare', 'Subscriptions', 'Utilities', 'Travel', 'Others']
+const DEFAULT_CATEGORIES = [
+  'Food & Dining', 'Groceries', 'Travel', 'Entertainment', 'Shopping',
+  'Utilities', 'Fuel', 'Healthcare', 'Education', 'Insurance',
+  'Investments', 'Financial Services', 'Subscriptions', 'Transfers',
+  'Rent', 'Salary', 'Cashback & Rewards', 'Others',
+]
 const PAYMENT_METHODS = ['Credit Card', 'UPI', 'Cash', 'Debit Card', 'Net Banking', 'Others']
 
 const DATE_PRESETS = [
@@ -20,6 +25,7 @@ export default function FilterPanel({ onFilter, loading, defaultValues = {} }) {
   const [paymentSources, setPaymentSources] = useState([])
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
   const [merchantSuggestions, setMerchantSuggestions] = useState([])
+  const [showFilters, setShowFilters] = useState(false)
   const debounceRef = useRef(null)
 
   useEffect(() => {
@@ -60,6 +66,21 @@ export default function FilterPanel({ onFilter, loading, defaultValues = {} }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-xl border border-gray-200 p-4">
+      {/* Mobile toggle */}
+      <button
+        type="button"
+        onClick={() => setShowFilters(s => !s)}
+        className="md:hidden w-full flex items-center justify-between text-sm font-medium text-slate-700 mb-2"
+      >
+        <span style={{ fontFamily: 'Syne, sans-serif' }}>Filters</span>
+        <svg
+          className={`w-4 h-4 text-slate-400 transition-transform ${showFilters ? 'rotate-180' : ''}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <div className={`${showFilters ? 'block' : 'hidden'} md:block`}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div>
           <label className="label">From</label>
@@ -135,6 +156,7 @@ export default function FilterPanel({ onFilter, loading, defaultValues = {} }) {
         <button type="button" onClick={onReset} className="btn-secondary text-sm py-1.5 px-4">
           Reset
         </button>
+      </div>
       </div>
     </form>
   )
